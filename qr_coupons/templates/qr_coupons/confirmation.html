@@ -1,0 +1,41 @@
+{% extends "qr_coupons/base.html" %}
+
+{% block title %}¡Registro Exitoso! - Tosto QR{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">¡Registro Exitoso!</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h4 class="mb-3">¡Gracias, {{ customer.first_name }}!</h4>
+                    <p class="lead">Tu registro ha sido completado exitosamente.</p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <h5 class="alert-heading">Tu código de cupón es:</h5>
+                        <div class="coupon-code">
+                            <h2 class="display-4 font-weight-bold">{{ coupon.code }}</h2>
+                        </div>
+                        <p class="mb-0">Valor del cupón: ${{ coupon.value }} USD</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p>Presenta este código en cualquiera de nuestras sucursales para recibir tu beneficio.</p>
+                        <p><strong>¡No lo pierdas!</strong> Te recomendamos tomar una captura de pantalla.</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <p class="text-muted text-center mb-0">Código válido hasta: {{ coupon.created_at|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

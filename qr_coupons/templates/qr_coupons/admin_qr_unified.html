@@ -1,0 +1,300 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Administración de Códigos QR - Tosto QR Admin{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; {% trans 'Administración de Códigos QR' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4">Administración de Códigos QR</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show mt-3">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="row">
+        <!-- Panel izquierdo: Lista de QR y formulario de creación -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="qr-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="list-tab" data-toggle="tab" href="#list-content" role="tab" aria-controls="list-content" aria-selected="true">Lista de QR</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="create-tab" data-toggle="tab" href="#create-content" role="tab" aria-controls="create-content" aria-selected="false">Crear nuevo</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="qr-tabs-content">
+                        <!-- Tab de lista de QR -->
+                        <div class="tab-pane fade show active" id="list-content" role="tabpanel" aria-labelledby="list-tab">
+                            {% if qr_codes %}
+                                <div class="list-group">
+                                    {% for qr in qr_codes %}
+                                        <form method="post" class="mb-0">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="select">
+                                            <input type="hidden" name="qr_id" value="{{ qr.id }}">
+                                            <input type="hidden" name="edit_mode" value="false">
+                                            <button type="submit" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if selected_qr.id == qr.id %}active{% endif %}">
+                                                <div>
+                                                    <strong>{{ qr.name }}</strong>
+                                                    <small class="d-block text-muted">{{ qr.created_at|date:"d/m/Y H:i" }}</small>
+                                                </div>
+                                                <span class="badge {% if qr.active %}badge-success{% else %}badge-secondary{% endif %} badge-pill">
+                                                    {% if qr.active %}Activo{% else %}Inactivo{% endif %}
+                                                </span>
+                                            </button>
+                                        </form>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No hay códigos QR disponibles.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Tab de creación de QR -->
+                        <div class="tab-pane fade" id="create-content" role="tabpanel" aria-labelledby="create-tab">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="create">
+                                
+                                <div class="form-group">
+                                    <label for="name">Nombre del Código QR</label>
+                                    <input type="text" class="form-control" id="name" name="name" required placeholder="Ej: Promoción Verano 2025">
+                                    <small class="form-text text-muted">Un nombre descriptivo para identificar este código QR.</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="description">Descripción (opcional)</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Descripción detallada de este código QR"></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Crear Código QR</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Panel derecho: Visualización y edición del QR seleccionado -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {% if selected_qr %}
+                            {% if edit_mode %}
+                                Editar: {{ selected_qr.name }}
+                            {% else %}
+                                Código QR: {{ selected_qr.name }}
+                            {% endif %}
+                        {% else %}
+                            Código QR
+                        {% endif %}
+                    </h5>
+                    {% if selected_qr and not edit_mode %}
+                        <div class="btn-group">
+                            <form method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="select">
+                                <input type="hidden" name="qr_id" value="{{ selected_qr.id }}">
+                                <input type="hidden" name="edit_mode" value="true">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Editar</button>
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#deleteModal">Eliminar</button>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    {% if selected_qr %}
+                        {% if edit_mode %}
+                            <!-- Formulario de edición -->
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="edit">
+                                <input type="hidden" name="qr_id" value="{{ selected_qr.id }}">
+                                
+                                <div class="form-group">
+                                    <label for="edit-name">Nombre</label>
+                                    <input type="text" class="form-control" id="edit-name" name="name" value="{{ selected_qr.name }}" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="edit-description">Descripción</label>
+                                    <textarea class="form-control" id="edit-description" name="description" rows="3">{{ selected_qr.description }}</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="edit-active" name="active" {% if selected_qr.active %}checked{% endif %}>
+                                        <label class="custom-control-label" for="edit-active">Activo</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                    <a href="{% url 'admin_qr' %}" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        {% else %}
+                            <!-- Vista del QR -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Detalles del código QR:</h6>
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Nombre:</dt>
+                                        <dd class="col-sm-8">{{ selected_qr.name }}</dd>
+                                        
+                                        <dt class="col-sm-4">Descripción:</dt>
+                                        <dd class="col-sm-8">{{ selected_qr.description|default:"Sin descripción" }}</dd>
+                                        
+                                        <dt class="col-sm-4">ID único:</dt>
+                                        <dd class="col-sm-8">{{ selected_qr.uuid }}</dd>
+                                        
+                                        <dt class="col-sm-4">Fecha de creación:</dt>
+                                        <dd class="col-sm-8">{{ selected_qr.created_at|date:"d/m/Y H:i" }}</dd>
+                                        
+                                        <dt class="col-sm-4">Estado:</dt>
+                                        <dd class="col-sm-8">
+                                            <span class="badge {% if selected_qr.active %}badge-success{% else %}badge-secondary{% endif %}">
+                                                {% if selected_qr.active %}Activo{% else %}Inactivo{% endif %}
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-6 text-center">
+                                    <div id="qr-image-container">
+                                        <!-- Primero intentamos mostrar la imagen si ya existe -->
+                                        {% if selected_qr.image_path %}
+                                            <img src="{{ selected_qr.image_path }}" alt="Código QR" class="img-fluid" style="max-width: 200px;">
+                                        {% else %}
+                                            <!-- Si no existe, la generamos -->
+                                            <img src="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" alt="Código QR" class="img-fluid" style="max-width: 200px;">
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" class="btn btn-sm btn-secondary" download="tosto_qr_{{ selected_qr.name|slugify }}.png">Descargar QR</a>
+                                        <button id="regenerate-qr" class="btn btn-sm btn-warning" data-qr-id="{{ selected_qr.id }}">Regenerar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="mt-4">
+                                <h6>Instrucciones de uso:</h6>
+                                <p>Este código QR dirige a los usuarios al formulario de registro. Cada usuario solo podrá registrarse una vez por código QR.</p>
+                                <ol>
+                                    <li>Descargue la imagen del código QR</li>
+                                    <li>Imprímala o compártala digitalmente con sus clientes</li>
+                                    <li>Los usuarios escanean el código y completan el formulario</li>
+                                    <li>Recibirán un cupón con código único para canjear</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <a href="{% url 'admin:index' %}" class="btn btn-primary">Volver al panel de administración</a>
+                                <a href="{% url 'admin_verify_coupon' %}" class="btn btn-info">Verificar y Canjear Cupones</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-center">Por favor, crea un código QR o selecciona uno existente para visualizarlo.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+{% if selected_qr %}
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar el código QR "{{ selected_qr.name }}"?</p>
+                <p class="text-danger">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="qr_id" value="{{ selected_qr.id }}">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block extrajs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const regenerateBtn = document.getElementById('regenerate-qr');
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', function() {
+                const qrId = this.getAttribute('data-qr-id');
+                const container = document.getElementById('qr-image-container');
+                
+                // Mostrar indicador de carga
+                container.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+                
+                // Hacer solicitud para regenerar el código QR
+                fetch(`/generate-qr/${qrId}/?direct=1&t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Actualizar la imagen con la nueva (añadiendo timestamp para evitar caché)
+                        const img = new Image();
+                        img.src = `/generate-qr/${qrId}/?direct=1&t=${new Date().getTime()}`;
+                        img.alt = "Código QR";
+                        img.className = "img-fluid";
+                        img.style.maxWidth = "200px";
+                        
+                        // Limpiar el contenedor y agregar la nueva imagen
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                    } else {
+                        container.innerHTML = '<div class="alert alert-danger">Error al regenerar el código QR</div>';
+                    }
+                })
+                .catch(error => {
+                    container.innerHTML = '<div class="alert alert-danger">Error al regenerar el código QR</div>';
+                    console.error('Error:', error);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

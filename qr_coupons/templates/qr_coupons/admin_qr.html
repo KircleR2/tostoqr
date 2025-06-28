@@ -1,0 +1,143 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Código QR - Tosto QR Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1>Códigos QR para Registro</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} mt-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Códigos QR disponibles</h5>
+                </div>
+                <div class="card-body">
+                    {% if qr_codes %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="qr_id" class="form-label">Seleccionar código QR</label>
+                                <select class="form-control" id="qr_id" name="qr_id" onchange="this.form.submit()">
+                                    {% for qr in qr_codes %}
+                                        <option value="{{ qr.id }}" {% if selected_qr.id == qr.id %}selected{% endif %}>{{ qr.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        
+                        {% if selected_qr %}
+                            <div class="mt-3">
+                                <h6>Detalles del código QR seleccionado:</h6>
+                                <p><strong>Nombre:</strong> {{ selected_qr.name }}</p>
+                                <p><strong>Descripción:</strong> {{ selected_qr.description|default:"Sin descripción" }}</p>
+                                <p><strong>ID único:</strong> {{ selected_qr.uuid }}</p>
+                                <p><strong>Fecha de creación:</strong> {{ selected_qr.created_at|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Estado:</strong> {% if selected_qr.active %}Activo{% else %}Inactivo{% endif %}</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p>No hay códigos QR disponibles.</p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'admin_create_qr' %}" class="btn btn-success">Crear nuevo código QR</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% if selected_qr %}
+                            Código QR: {{ selected_qr.name }}
+                        {% else %}
+                            Código QR
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if selected_qr %}
+                        <p class="lead">Este código QR dirige a los usuarios al formulario de registro:</p>
+                        <div class="my-4" id="qr-image-container">
+                            <!-- Primero intentamos mostrar la imagen si ya existe -->
+                            {% if selected_qr.image_path %}
+                                <img src="{{ selected_qr.image_path }}" alt="Código QR" class="img-fluid" style="max-width: 300px;">
+                            {% else %}
+                                <!-- Si no existe, la generamos -->
+                                <img src="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" alt="Código QR" class="img-fluid" style="max-width: 300px;">
+                            {% endif %}
+                        </div>
+                        <p>Escanea este código con tu dispositivo móvil para acceder al formulario de registro.</p>
+                        
+                        <div class="mt-4">
+                            <a href="{% url 'admin:index' %}" class="btn btn-primary">Volver al panel de administración</a>
+                            <a href="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" class="btn btn-secondary" download="tosto_qr_{{ selected_qr.name|slugify }}.png">Descargar código QR</a>
+                            <button id="regenerate-qr" class="btn btn-warning" data-qr-id="{{ selected_qr.id }}">Regenerar código QR</button>
+                        </div>
+                    {% else %}
+                        <p>Por favor, crea un código QR o selecciona uno existente para visualizarlo.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if selected_qr %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const regenerateBtn = document.getElementById('regenerate-qr');
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', function() {
+                const qrId = this.getAttribute('data-qr-id');
+                const container = document.getElementById('qr-image-container');
+                
+                // Mostrar indicador de carga
+                container.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+                
+                // Hacer solicitud para regenerar el código QR
+                fetch(`/generate-qr/${qrId}/?direct=1&t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Actualizar la imagen con la nueva (añadiendo timestamp para evitar caché)
+                        const img = new Image();
+                        img.src = `/generate-qr/${qrId}/?direct=1&t=${new Date().getTime()}`;
+                        img.alt = "Código QR";
+                        img.className = "img-fluid";
+                        img.style.maxWidth = "300px";
+                        
+                        // Limpiar el contenedor y agregar la nueva imagen
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                    } else {
+                        container.innerHTML = '<div class="alert alert-danger">Error al regenerar el código QR</div>';
+                    }
+                })
+                .catch(error => {
+                    container.innerHTML = '<div class="alert alert-danger">Error al regenerar el código QR</div>';
+                    console.error('Error:', error);
+                });
+            });
+        }
+    });
+</script>
+{% endif %}
+{% endblock %} 

@@ -1,0 +1,118 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Verificar y Canjear Cupones - Tosto QR Admin{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; {% trans 'Verificar y Canjear Cupones' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4">Verificar y Canjear Cupones</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show mt-3">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Verificar Cupón</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="code">Código de Cupón</label>
+                            <input type="text" class="form-control" id="code" name="code" required placeholder="Ingrese el código de 6 dígitos" value="{{ code|default:'' }}">
+                            <small class="form-text text-muted">Ingrese el código de 6 dígitos que el cliente recibió al registrarse.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="branch_id">Sucursal</label>
+                            <select class="form-control" id="branch_id" name="branch_id" required>
+                                <option value="">Seleccione una sucursal</option>
+                                {% for branch in branches %}
+                                    <option value="{{ branch.id }}">{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Seleccione la sucursal donde se está canjeando el cupón.</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Verificar y Canjear</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            {% if coupon and success %}
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Cupón Canjeado Exitosamente</h5>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">Cupón: {{ coupon.code }}</h4>
+                        <dl class="row">
+                            <dt class="col-sm-4">Cliente:</dt>
+                            <dd class="col-sm-8">{{ coupon.customer.first_name }} {{ coupon.customer.last_name }}</dd>
+                            
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8">{{ coupon.customer.email }}</dd>
+                            
+                            <dt class="col-sm-4">Teléfono:</dt>
+                            <dd class="col-sm-8">{{ coupon.customer.phone_number }}</dd>
+                            
+                            <dt class="col-sm-4">Valor:</dt>
+                            <dd class="col-sm-8">${{ coupon.value }} USD</dd>
+                            
+                            <dt class="col-sm-4">Fecha de canje:</dt>
+                            <dd class="col-sm-8">{{ coupon.redeemed_at|date:"d/m/Y H:i" }}</dd>
+                            
+                            <dt class="col-sm-4">Sucursal:</dt>
+                            <dd class="col-sm-8">{{ coupon.redeemed_at_branch.name }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Instrucciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Para verificar y canjear un cupón:</p>
+                        <ol>
+                            <li>Solicite al cliente el código de 6 dígitos que recibió al registrarse.</li>
+                            <li>Ingrese el código en el formulario.</li>
+                            <li>Seleccione la sucursal donde se está realizando el canje.</li>
+                            <li>Haga clic en "Verificar y Canjear".</li>
+                        </ol>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Los cupones solo pueden canjearse una vez. Una vez canjeado, el cupón quedará marcado como "Canjeado" y no podrá utilizarse nuevamente.
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'admin:index' %}" class="btn btn-secondary">Volver al panel de administración</a>
+        <a href="{% url 'admin_qr' %}" class="btn btn-primary">Administrar Códigos QR</a>
+    </div>
+</div>
+{% endblock %} 

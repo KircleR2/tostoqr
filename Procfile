@@ -1,0 +1,1 @@
+web: gunicorn tosto_qr_project.wsgi:application 

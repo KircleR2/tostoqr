@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Crear Código QR - Tosto QR Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1>Crear Nuevo Código QR</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} mt-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nombre del Código QR</label>
+                    <input type="text" class="form-control" id="name" name="name" required placeholder="Ej: Promoción Verano 2025">
+                    <div class="form-text">Un nombre descriptivo para identificar este código QR.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Descripción (opcional)</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Descripción detallada de este código QR"></textarea>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Crear Código QR</button>
+                    <a href="{% url 'admin_qr' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
