@@ -13,23 +13,22 @@ admin.site.index_title = "Bienvenido al Portal de Administración de Tosto QR"
 # Agregar enlace al generador de QR en el panel de administración
 admin.site.index_template = 'admin/custom_index.html'
 
-@admin.register(Branch)
+# Simplificamos el administrador de Branch para evitar problemas
 class BranchAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'active')
-    list_filter = ('active',)
-    search_fields = ('name', 'address')
     
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path('add/', self.admin_site.admin_view(self.redirect_to_branch_admin), name='qr_coupons_branch_add'),
-            path('<path:object_id>/change/', self.admin_site.admin_view(self.redirect_to_branch_admin), name='qr_coupons_branch_change'),
         ]
         return custom_urls + urls
     
-    def redirect_to_branch_admin(self, request, object_id=None):
+    def redirect_to_branch_admin(self, request):
         """Redirigir a la vista personalizada de administración de sucursales"""
         return redirect('admin_branch')
+    
+admin.site.register(Branch, BranchAdmin)
 
 # Registrar QRCode pero ocultarlo del menú principal
 @admin.register(QRCode)

@@ -18,5 +18,7 @@ urlpatterns = [
     # URLs para administración personalizada
     path('admin/qr-code/', admin_views.admin_qr_view, name='admin_qr'),
     path('admin/verify-coupon/', admin_views.verify_coupon_view, name='admin_verify_coupon'),
+    
+    # Nueva URL para la vista personalizada de sucursales
     path('admin/branch/', admin_views.admin_branch_view, name='admin_branch'),
 ] 
