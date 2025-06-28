@@ -37,3 +37,7 @@ if settings.DEBUG:
     # Servir archivos estáticos desde las aplicaciones
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
     urlpatterns += staticfiles_urlpatterns()
+else:
+    # En producción, WhiteNoise se encarga de servir los archivos estáticos
+    # No necesitamos añadir nada aquí, pero podemos añadir URLs para servir archivos de medios
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

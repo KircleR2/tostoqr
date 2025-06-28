@@ -1,8 +1,12 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 from . import admin_views
 
 urlpatterns = [
+    # Redirección desde la URL raíz al panel de administración
+    path('', RedirectView.as_view(url='/admin/', permanent=False), name='index'),
+    
     # URLs para usuarios finales
     path('register/<uuid:qr_uuid>/', views.register_form_view, name='register_form'),
     path('confirmation/<uuid:customer_uuid>/', views.confirmation_view, name='confirmation'),
