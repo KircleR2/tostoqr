@@ -269,6 +269,7 @@ JAZZMIN_UI_TWEAKS = {
 JAZZMIN_SETTINGS["custom_links"] = {
     "qr_coupons": [
         {"name": "Códigos QR", "url": "admin_qr", "icon": "fas fa-qrcode"},
+        {"name": "Sucursales", "url": "admin_branch", "icon": "fas fa-store"},
         {"name": "Verificar y Canjear Cupones", "url": "admin_verify_coupon", "icon": "fas fa-ticket-alt"},
     ]
 }
