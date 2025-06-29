@@ -8,16 +8,13 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Registro para Cupón</h3>
-                </div>
                 <div class="card-body">
                     <div class="text-center mb-4">
                         <img src="{% static 'qr_coupons/images/logo.svg' %}" alt="Logo Tosto QR" style="max-height: 80px;">
                     </div>
 
                     <div class="mb-4 text-center">
-                        <h4>{{ qr_code.name }}</h4>
+                        <h3>{{ qr_code.name }}</h3>
                         {% if qr_code.description %}
                             <p class="text-muted">{{ qr_code.description }}</p>
                         {% endif %}
