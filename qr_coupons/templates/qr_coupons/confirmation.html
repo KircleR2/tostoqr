@@ -3,6 +3,9 @@
 {% block title %}¡Registro Exitoso! - Tosto QR{% endblock %}
 
 {% block content %}
+<div class="text-center mb-4">
+    <img src="{% static 'qr_coupons/images/logo.svg' %}" alt="Logo Tosto QR" style="max-height: 80px;">
+</div>
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -23,7 +26,7 @@
                         <div class="coupon-code">
                             <h2 class="display-4 font-weight-bold">{{ coupon.code }}</h2>
                         </div>
-                        <p class="mb-0">Valor del cupón: ${{ coupon.value }} USD</p>
+                        <p class="mb-0">Valor del cupón: {{ coupon.value }}</p>
                     </div>
                     
                     <div class="mt-4">
