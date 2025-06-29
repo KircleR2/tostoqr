@@ -5,7 +5,7 @@ django-jazzmin==3.0.1
 gunicorn==21.2.0
 packaging==25.0
 pillow==11.2.1
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 pypng==0.20220715.0
 python-dotenv==1.0.1
 qrcode==7.4.2
