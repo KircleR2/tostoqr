@@ -17,17 +17,6 @@ admin.site.index_template = 'admin/custom_index.html'
 class BranchAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'active')
     
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('add/', self.admin_site.admin_view(self.redirect_to_branch_admin), name='qr_coupons_branch_add'),
-        ]
-        return custom_urls + urls
-    
-    def redirect_to_branch_admin(self, request):
-        """Redirigir a la vista personalizada de administración de sucursales"""
-        return redirect('admin_branch')
-    
 admin.site.register(Branch, BranchAdmin)
 
 # Registrar QRCode pero ocultarlo del menú principal
