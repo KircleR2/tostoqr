@@ -1,4 +1,5 @@
 {% extends "qr_coupons/base.html" %}
+{% load static %}
 
 {% block title %}Error - Tosto QR{% endblock %}
 
@@ -6,26 +7,17 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-danger text-white">
-                    <h3 class="mb-0">Error</h3>
-                </div>
-                <div class="card-body text-center">
-                    <div class="mb-4">
-                        <i class="fas fa-exclamation-circle text-danger" style="font-size: 5rem;"></i>
+            <div class="card shadow text-center">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{% static 'qr_coupons/images/logo.svg' %}" alt="Logo Tosto QR" style="max-height: 80px;">
                     </div>
-                    
-                    <h4 class="mb-3">Ha ocurrido un problema</h4>
-                    <p class="lead">{{ message }}</p>
-                    
-                    <div class="mt-4">
-                        <p>Si crees que esto es un error, por favor contacta con nuestro equipo de soporte.</p>
+                    <i class="fas fa-times-circle fa-5x text-danger mb-4"></i>
+                    <h3 class="card-title">Ha ocurrido un error</h3>
+                    <div class="alert alert-danger">
+                        {{ message }}
                     </div>
-                </div>
-                <div class="card-footer">
-                    <div class="text-center">
-                        <a href="javascript:history.back()" class="btn btn-secondary">Volver</a>
-                    </div>
+                    <a href="javascript:history.back()" class="btn btn-primary mt-3">Volver atrás</a>
                 </div>
             </div>
         </div>
