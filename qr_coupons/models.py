@@ -23,6 +23,7 @@ class QRCode(models.Model):
     """Modelo para representar códigos QR generados"""
     name = models.CharField(max_length=100, verbose_name="Nombre")
     description = models.TextField(blank=True, null=True, verbose_name="Descripción")
+    coupon_value = models.CharField(max_length=100, default='Valor no definido', verbose_name="Valor del Cupón")
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, verbose_name="UUID")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
     active = models.BooleanField(default=True, verbose_name="Activo")
@@ -63,7 +64,7 @@ class Coupon(models.Model):
     
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="coupons", verbose_name="Cliente")
     code = models.CharField(max_length=10, unique=True, verbose_name="Código")
-    value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor")
+    value = models.CharField(max_length=100, verbose_name="Valor")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active', verbose_name="Estado")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
     redeemed_at = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de canje")

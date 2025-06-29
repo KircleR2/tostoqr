@@ -85,6 +85,12 @@
                                     <label for="description">Descripción (opcional)</label>
                                     <textarea class="form-control" id="description" name="description" rows="3" placeholder="Descripción detallada de este código QR"></textarea>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="coupon_value">Valor del Cupón</label>
+                                    <input type="text" class="form-control" id="coupon_value" name="coupon_value" required placeholder="Ej: 10% de descuento">
+                                    <small class="form-text text-muted">El valor que tendrá el cupón generado (texto o número).</small>
+                                </div>
                                 
                                 <button type="submit" class="btn btn-primary">Crear Código QR</button>
                             </form>
@@ -141,6 +147,11 @@
                                     <label for="edit-description">Descripción</label>
                                     <textarea class="form-control" id="edit-description" name="description" rows="3">{{ selected_qr.description }}</textarea>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="edit-coupon-value">Valor del Cupón</label>
+                                    <input type="text" class="form-control" id="edit-coupon-value" name="coupon_value" value="{{ selected_qr.coupon_value }}" required>
+                                </div>
                                 
                                 <div class="form-group">
                                     <div class="custom-control custom-switch">
@@ -165,6 +176,9 @@
                                         
                                         <dt class="col-sm-4">Descripción:</dt>
                                         <dd class="col-sm-8">{{ selected_qr.description|default:"Sin descripción" }}</dd>
+                                        
+                                        <dt class="col-sm-4">Valor del Cupón:</dt>
+                                        <dd class="col-sm-8">{{ selected_qr.coupon_value }}</dd>
                                         
                                         <dt class="col-sm-4">ID único:</dt>
                                         <dd class="col-sm-8">{{ selected_qr.uuid }}</dd>

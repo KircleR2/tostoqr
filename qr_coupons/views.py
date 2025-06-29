@@ -47,7 +47,7 @@ def register_form_view(request, qr_uuid=None):
             Coupon.objects.create(
                 customer=customer,
                 code=code,
-                value=10.00,  # Valor predeterminado
+                value=qr_code.coupon_value,
                 status='active'
             )
             

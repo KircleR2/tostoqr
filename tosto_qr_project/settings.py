@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-+zsolr*&80pbr9u+c-uku4l4s*lf^qcwh&6)e&v5p5nwbq80dm")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,.onrender.com").split(",")
 
@@ -200,6 +200,10 @@ JAZZMIN_SETTINGS = {
     # Lista de menús personalizados
     "custom_links": {
         "qr_coupons": [{
+            "name": "Administración de Códigos QR",
+            "url": "admin_qr",
+            "icon": "fas fa-qrcode",
+        }, {
             "name": "Verificar y Canjear Cupones",
             "url": "admin_verify_coupon",
             "icon": "fas fa-ticket-alt",
