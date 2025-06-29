@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.admin import site
-from .models import Coupon, Branch, QRCode
+from .models import Coupon, Branch, QRCode, Customer
 import uuid
 import os
 from django.conf import settings
@@ -18,20 +18,91 @@ from django.urls import reverse
 def admin_qr_view(request):
     """Vista personalizada para administrar códigos QR"""
     qr_codes = QRCode.objects.all().order_by('-created_at')
+    selected_qr = None
+    edit_mode = False
     
-    if request.method == 'POST':
-        form = QRCodeForm(request.POST)
-        if form.is_valid():
-            qr = form.save()
-            messages.success(request, f'Código QR "{qr.name}" creado exitosamente.')
-            return redirect('admin_qr')
-    else:
-        form = QRCodeForm()
+    # Procesar la creación de un nuevo código QR
+    if request.method == 'POST' and 'action' in request.POST:
+        action = request.POST.get('action')
+        
+        # Crear un nuevo QR
+        if action == 'create':
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            
+            if not name:
+                messages.error(request, "Por favor, ingrese un nombre para el código QR.")
+            else:
+                qr_code = QRCode.objects.create(
+                    name=name,
+                    description=description,
+                    active=True
+                )
+                
+                # Generar y guardar la imagen QR
+                qr_img = generate_qr_image(request, qr_code.uuid)
+                
+                # Guardar la ruta de la imagen en el objeto QR
+                qr_code.image_path = f'/static/qr_coupons/images/qr_{qr_code.id}_{qr_code.uuid}.png'
+                qr_code.save()
+                
+                messages.success(request, f"Código QR '{name}' creado exitosamente.")
+                selected_qr = qr_code
+        
+        # Editar un QR existente
+        elif action == 'edit':
+            qr_id = request.POST.get('qr_id')
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            active = request.POST.get('active') == 'on'
+            
+            if not qr_id or not name:
+                messages.error(request, "Información incompleta para editar el código QR.")
+            else:
+                try:
+                    qr_code = QRCode.objects.get(id=qr_id)
+                    qr_code.name = name
+                    qr_code.description = description
+                    qr_code.active = active
+                    qr_code.save()
+                    messages.success(request, f"Código QR '{name}' actualizado exitosamente.")
+                    selected_qr = qr_code
+                except QRCode.DoesNotExist:
+                    messages.error(request, "El código QR no existe.")
+        
+        # Eliminar un QR
+        elif action == 'delete':
+            qr_id = request.POST.get('qr_id')
+            if qr_id:
+                try:
+                    qr_code = QRCode.objects.get(id=qr_id)
+                    name = qr_code.name
+                    qr_code.delete()
+                    messages.success(request, f"Código QR '{name}' eliminado exitosamente.")
+                except QRCode.DoesNotExist:
+                    messages.error(request, "El código QR no existe.")
+            else:
+                messages.error(request, "No se especificó un código QR para eliminar.")
+        
+        # Seleccionar un QR
+        elif action == 'select':
+            qr_id = request.POST.get('qr_id')
+            if qr_id:
+                try:
+                    selected_qr = QRCode.objects.get(id=qr_id)
+                    edit_mode = request.POST.get('edit_mode') == 'true'
+                except QRCode.DoesNotExist:
+                    messages.error(request, "El código QR seleccionado no existe.")
+    
+    # Si no hay QR seleccionado y hay QRs disponibles, seleccionar el primero
+    if not selected_qr and qr_codes.exists():
+        selected_qr = qr_codes.first()
     
     return render(request, 'qr_coupons/admin_qr_unified.html', {
         'qr_codes': qr_codes,
-        'form': form,
-        'title': 'Administrar Códigos QR',
+        'selected_qr': selected_qr,
+        'edit_mode': edit_mode,
+        'title': 'Administración de Códigos QR',
         'site_title': 'Tosto QR Admin',
         'site_header': 'Tosto QR',
         'has_permission': True,
@@ -43,88 +114,77 @@ def admin_qr_view(request):
 @staff_member_required
 def admin_create_qr_view(request):
     """Vista para crear un nuevo código QR"""
-    if request.method == 'POST':
-        form = QRCodeForm(request.POST)
-        if form.is_valid():
-            qr = form.save()
-            
-            # Generar y guardar la imagen QR
-            qr_img = generate_qr_image(request, qr.uuid)
-            
-            # Guardar la ruta de la imagen en el objeto QR
-            qr.image_path = f'/static/qr_coupons/images/qr_{qr.id}_{qr.uuid}.png'
-            qr.save()
-            
-            messages.success(request, f'Código QR "{qr.name}" creado exitosamente.')
-            return redirect('admin_qr')
-    else:
-        form = QRCodeForm()
-    
-    return render(request, 'qr_coupons/admin_create_qr.html', {
-        'form': form,
-        'title': 'Crear Código QR',
-        'site_title': 'Tosto QR Admin',
-        'site_header': 'Tosto QR',
-        'has_permission': True,
-        'is_popup': False,
-        'is_nav_sidebar_enabled': True,
-        'available_apps': [],
-    })
+    # Redirigir a la vista unificada
+    return redirect('admin_qr')
 
 @staff_member_required
 def verify_coupon_view(request):
     """Vista para verificar y canjear cupones"""
+    branches = Branch.objects.filter(active=True)
+    coupon = None
+    success = False
+    
     if request.method == 'POST':
-        form = VerifyCouponForm(request.POST)
-        if form.is_valid():
-            code = form.cleaned_data['code']
-            branch_id = form.cleaned_data['branch']
+        code = request.POST.get('code')
+        branch_id = request.POST.get('branch_id')
+        
+        if not code:
+            messages.error(request, "Por favor, ingrese un código de cupón.")
+            return render(request, 'qr_coupons/admin_verify_coupon.html', {
+                'branches': branches,
+                'title': 'Verificar y Canjear Cupones',
+                'site_title': 'Tosto QR Admin',
+                'site_header': 'Tosto QR',
+                'has_permission': True,
+                'is_popup': False,
+                'is_nav_sidebar_enabled': True,
+                'available_apps': [],
+            })
+        
+        if not branch_id:
+            messages.error(request, "Por favor, seleccione una sucursal.")
+            return render(request, 'qr_coupons/admin_verify_coupon.html', {
+                'branches': branches,
+                'code': code,
+                'title': 'Verificar y Canjear Cupones',
+                'site_title': 'Tosto QR Admin',
+                'site_header': 'Tosto QR',
+                'has_permission': True,
+                'is_popup': False,
+                'is_nav_sidebar_enabled': True,
+                'available_apps': [],
+            })
+        
+        try:
+            coupon = Coupon.objects.get(code=code)
             
-            try:
-                coupon = Coupon.objects.get(code=code)
-                
-                if coupon.status == 'redeemed':
-                    messages.error(request, f'El cupón {code} ya ha sido canjeado.')
-                elif coupon.status == 'expired':
-                    messages.error(request, f'El cupón {code} ha expirado.')
-                else:
-                    # Canjear el cupón
+            if coupon.status == 'redeemed':
+                messages.error(request, f"El cupón {code} ya ha sido canjeado en {coupon.redeemed_at_branch} el {coupon.redeemed_at.strftime('%d/%m/%Y %H:%M')}.")
+            elif coupon.status == 'expired':
+                messages.error(request, f"El cupón {code} ha expirado.")
+            else:
+                try:
                     branch = Branch.objects.get(id=branch_id)
+                    
+                    # Canjear el cupón
                     coupon.status = 'redeemed'
                     coupon.redeemed_at = timezone.now()
                     coupon.redeemed_at_branch = branch
                     coupon.save()
                     
-                    messages.success(request, f'Cupón {code} canjeado exitosamente en {branch.name}.')
+                    messages.success(request, f"Cupón {code} canjeado exitosamente. Valor: ${coupon.value} USD.")
+                    success = True
                     
-                    # Mostrar información del cliente
-                    customer = coupon.customer
-                    context = {
-                        'coupon': coupon,
-                        'customer': customer,
-                        'form': VerifyCouponForm(),
-                        'title': 'Verificar y Canjear Cupones',
-                        'site_title': 'Tosto QR Admin',
-                        'site_header': 'Tosto QR',
-                        'has_permission': True,
-                        'is_popup': False,
-                        'is_nav_sidebar_enabled': True,
-                        'available_apps': [],
-                    }
-                    return render(request, 'qr_coupons/admin_verify_coupon.html', context)
-                    
-            except Coupon.DoesNotExist:
-                messages.error(request, f'El cupón {code} no existe.')
-            except Branch.DoesNotExist:
-                messages.error(request, f'La sucursal seleccionada no existe.')
-    else:
-        form = VerifyCouponForm()
-    
-    branches = Branch.objects.filter(active=True)
+                except Branch.DoesNotExist:
+                    messages.error(request, "La sucursal seleccionada no existe.")
+            
+        except Coupon.DoesNotExist:
+            messages.error(request, f"El cupón {code} no existe.")
     
     return render(request, 'qr_coupons/admin_verify_coupon.html', {
-        'form': form,
         'branches': branches,
+        'coupon': coupon,
+        'success': success,
         'title': 'Verificar y Canjear Cupones',
         'site_title': 'Tosto QR Admin',
         'site_header': 'Tosto QR',
