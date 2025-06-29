@@ -184,7 +184,7 @@
                                     <div id="qr-image-container">
                                         <!-- Primero intentamos mostrar la imagen si ya existe -->
                                         {% if selected_qr.image_path %}
-                                            <img src="{{ selected_qr.image_path }}" alt="Código QR" class="img-fluid" style="max-width: 200px;">
+                                            <img src="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" alt="Código QR" class="img-fluid" style="max-width: 200px;">
                                         {% else %}
                                             <!-- Si no existe, la generamos -->
                                             <img src="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" alt="Código QR" class="img-fluid" style="max-width: 200px;">
@@ -266,20 +266,27 @@
                 container.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
                 
                 // Hacer solicitud para regenerar el código QR
-                fetch(`/generate-qr/${qrId}/?direct=1&t=${new Date().getTime()}`, {
+                fetch(`/generate-qr/${qrId}/?direct=1&regenerate=1&t=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
                     }
                 })
                 .then(response => {
                     if (response.ok) {
                         // Actualizar la imagen con la nueva (añadiendo timestamp para evitar caché)
                         const img = new Image();
-                        img.src = `/generate-qr/${qrId}/?direct=1&t=${new Date().getTime()}`;
+                        img.src = `/generate-qr/${qrId}/?direct=1&regenerate=1&t=${new Date().getTime()}`;
                         img.alt = "Código QR";
                         img.className = "img-fluid";
                         img.style.maxWidth = "200px";
+                        
+                        // Forzar la recarga de la imagen sin caché
+                        img.onload = function() {
+                            // Imagen cargada correctamente
+                            console.log("Imagen QR regenerada correctamente");
+                        };
                         
                         // Limpiar el contenedor y agregar la nueva imagen
                         container.innerHTML = '';

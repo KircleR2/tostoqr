@@ -82,8 +82,11 @@ def generate_qr_view(request, qr_id):
     """Genera una imagen QR para un código QR específico"""
     qr_code_obj = get_object_or_404(QRCode, id=qr_id)
     
-    # Verificar si ya existe una imagen para este QR
-    if qr_code_obj.image_path and os.path.exists(os.path.join(settings.BASE_DIR, qr_code_obj.image_path.lstrip('/'))):
+    # Si se solicita regenerar o si no existe la imagen, siempre generamos una nueva
+    if request.GET.get('regenerate') == '1' or not qr_code_obj.image_path or not os.path.exists(os.path.join(settings.BASE_DIR, qr_code_obj.image_path.lstrip('/'))):
+        # Generaremos una nueva imagen
+        pass
+    else:
         # Si la solicitud incluye direct=1, devolver la imagen directamente
         if request.GET.get('direct') == '1':
             with open(os.path.join(settings.BASE_DIR, qr_code_obj.image_path.lstrip('/')), 'rb') as f:
