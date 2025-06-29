@@ -68,6 +68,8 @@ class CouponAdminForm(forms.ModelForm):
         if status == 'redeemed':
             if not redeemed_at:
                 cleaned_data['redeemed_at'] = timezone.now()
+            if not redeemed_at_branch:
+                self.add_error('redeemed_at_branch', 'Se requiere una sucursal para marcar un cupón como canjeado.')
             
         # Si el estado no es 'redeemed', no debe tener fecha ni sucursal de canje
         elif status in ['active', 'expired']:

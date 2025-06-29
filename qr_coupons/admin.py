@@ -5,6 +5,8 @@ from django.contrib.admin import AdminSite
 from django.shortcuts import redirect
 from .models import Branch, Customer, Coupon, QRCode
 from .forms import CouponAdminForm
+import random
+import string
 
 # Personalizar el sitio de administración
 admin.site.site_header = "Tosto QR Admin"
@@ -82,7 +84,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email', 'phone_number', 'qr_code', 'created_at')
     list_filter = ('created_at', 'qr_code')
     search_fields = ('first_name', 'last_name', 'email', 'phone_number')
-    readonly_fields = ('created_at',)
+    readonly_fields = ('created_at', 'uuid')
     
     def save_model(self, request, obj, form, change):
         """Asegurarse de que se guarde correctamente el cliente"""
@@ -101,9 +103,7 @@ class CouponAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         """Generar un código único para el cupón si es nuevo"""
-        if not change and not obj.code:  # Si es una creación nueva y no tiene código
-            import random
-            import string
+        if not obj.code:
             # Generar un código único de 6 dígitos
             code = ''.join(random.choices(string.digits, k=6))
             # Verificar que el código no exista ya
