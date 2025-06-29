@@ -4,6 +4,7 @@ from django.urls import path
 from django.contrib.admin import AdminSite
 from django.shortcuts import redirect
 from .models import Branch, Customer, Coupon, QRCode
+from .forms import CouponAdminForm
 
 # Personalizar el sitio de administración
 admin.site.site_header = "Tosto QR Admin"
@@ -81,16 +82,38 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email', 'phone_number', 'qr_code', 'created_at')
     list_filter = ('created_at', 'qr_code')
     search_fields = ('first_name', 'last_name', 'email', 'phone_number')
-    readonly_fields = ('created_at',)
+    readonly_fields = ('created_at', 'uuid')
+    
+    def save_model(self, request, obj, form, change):
+        """Asegurarse de que se guarde correctamente el cliente"""
+        if not change:  # Si es una creación nueva
+            import uuid
+            obj.uuid = uuid.uuid4()  # Asegurarse de que tenga un UUID
+        super().save_model(request, obj, form, change)
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
+    form = CouponAdminForm
     list_display = ('code', 'customer', 'value', 'status', 'created_at', 'redeemed_at', 'redeemed_at_branch')
     list_filter = ('status', 'created_at', 'redeemed_at')
     search_fields = ('code', 'customer__first_name', 'customer__last_name', 'customer__email')
-    readonly_fields = ('code', 'created_at')
+    readonly_fields = ('created_at',)
+    fields = ('customer', 'value', 'status', 'code', 'redeemed_at', 'redeemed_at_branch', 'created_at')
     
     actions = ['redeem_coupons']
+    
+    def save_model(self, request, obj, form, change):
+        """Generar un código único para el cupón si es nuevo"""
+        if not change and not obj.code:  # Si es una creación nueva y no tiene código
+            import random
+            import string
+            # Generar un código único de 6 dígitos
+            while True:
+                code = ''.join(random.choices(string.digits, k=6))
+                if not Coupon.objects.filter(code=code).exists():
+                    obj.code = code
+                    break
+        super().save_model(request, obj, form, change)
     
     def redeem_coupons(self, request, queryset):
         """Acción para marcar cupones como canjeados"""

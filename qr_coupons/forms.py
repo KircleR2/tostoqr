@@ -33,6 +33,22 @@ class QRCodeForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
         }
 
+class CouponAdminForm(forms.ModelForm):
+    """Formulario personalizado para la administración de cupones"""
+    
+    class Meta:
+        model = Coupon
+        fields = ['customer', 'value', 'status', 'code', 'redeemed_at', 'redeemed_at_branch']
+        widgets = {
+            'code': forms.TextInput(attrs={'placeholder': 'Dejar en blanco para generar automáticamente'})
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['code'].required = False
+        if not self.instance.pk:  # Si es un nuevo cupón
+            self.fields['code'].help_text = 'Dejar en blanco para generar automáticamente un código único'
+
 class VerifyCouponForm(forms.Form):
     code = forms.CharField(
         label='Código del Cupón',
