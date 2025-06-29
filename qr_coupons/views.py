@@ -27,31 +27,43 @@ def register_form_view(request, qr_uuid=None):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if form.is_valid():
-            # Verificar si el cliente ya está registrado con este QR
+            # Verificar si el cliente ya está registrado con este QR usando el email
             email = form.cleaned_data['email']
+            phone = form.cleaned_data['phone_number']
+            
+            # Verificar si ya existe un cliente con este email para este QR
             if Customer.objects.filter(email=email, qr_code=qr_code).exists():
-                messages.error(request, "Ya te has registrado con este código QR anteriormente.")
-                return render(request, 'qr_coupons/error.html', {'message': "Ya te has registrado con este código QR anteriormente."})
+                messages.error(request, "Este correo electrónico ya ha sido registrado con este código QR.")
+                return render(request, 'qr_coupons/error.html', {'message': "Este correo electrónico ya ha sido registrado con este código QR."})
+            
+            # Verificar si ya existe un cliente con este teléfono para este QR
+            if Customer.objects.filter(phone_number=phone, qr_code=qr_code).exists():
+                messages.error(request, "Este número de teléfono ya ha sido registrado con este código QR.")
+                return render(request, 'qr_coupons/error.html', {'message': "Este número de teléfono ya ha sido registrado con este código QR."})
             
             # Crear el cliente
-            customer = form.save(commit=False)
-            customer.qr_code = qr_code
-            customer.uuid = uuid.uuid4()
-            customer.save()
-            
-            # Generar un cupón para el cliente
-            code = ''.join(random.choices(string.digits, k=6))
-            while Coupon.objects.filter(code=code).exists():
-                code = ''.join(random.choices(string.digits, k=6))
+            try:
+                customer = form.save(commit=False)
+                customer.qr_code = qr_code
+                customer.uuid = uuid.uuid4()
+                customer.save()
                 
-            Coupon.objects.create(
-                customer=customer,
-                code=code,
-                value=qr_code.coupon_value,
-                status='active'
-            )
-            
-            return redirect('confirmation', customer_uuid=customer.uuid)
+                # Generar un cupón para el cliente
+                code = ''.join(random.choices(string.digits, k=6))
+                while Coupon.objects.filter(code=code).exists():
+                    code = ''.join(random.choices(string.digits, k=6))
+                    
+                Coupon.objects.create(
+                    customer=customer,
+                    code=code,
+                    value=qr_code.coupon_value,
+                    status='active'
+                )
+                
+                return redirect('confirmation', customer_uuid=customer.uuid)
+            except IntegrityError:
+                messages.error(request, "Ha ocurrido un error al registrar tus datos. Es posible que ya te hayas registrado anteriormente.")
+                return render(request, 'qr_coupons/error.html', {'message': "Ha ocurrido un error al registrar tus datos. Es posible que ya te hayas registrado anteriormente."})
     else:
         form = CustomerForm()
     

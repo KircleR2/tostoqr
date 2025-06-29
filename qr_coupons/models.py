@@ -49,7 +49,10 @@ class Customer(models.Model):
     class Meta:
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
-        unique_together = ('email', 'qr_code')  # Un cliente solo puede registrarse una vez por código QR
+        unique_together = [
+            ('email', 'qr_code'),  # Un cliente solo puede registrarse una vez por código QR con el mismo email
+            ('phone_number', 'qr_code'),  # Un cliente solo puede registrarse una vez por código QR con el mismo teléfono
+        ]
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
