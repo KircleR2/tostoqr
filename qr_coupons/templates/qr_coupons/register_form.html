@@ -1,4 +1,5 @@
 {% extends "qr_coupons/base.html" %}
+{% load static %}
 
 {% block title %}Registro - Tosto QR{% endblock %}
 
@@ -11,6 +12,10 @@
                     <h3 class="mb-0">Registro para Cupón</h3>
                 </div>
                 <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{% static 'qr_coupons/images/logo.svg' %}" alt="Logo Tosto QR" style="max-height: 80px;">
+                    </div>
+
                     <div class="mb-4 text-center">
                         <h4>{{ qr_code.name }}</h4>
                         {% if qr_code.description %}
