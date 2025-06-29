@@ -82,13 +82,10 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email', 'phone_number', 'qr_code', 'created_at')
     list_filter = ('created_at', 'qr_code')
     search_fields = ('first_name', 'last_name', 'email', 'phone_number')
-    readonly_fields = ('created_at', 'uuid')
+    readonly_fields = ('created_at',)
     
     def save_model(self, request, obj, form, change):
         """Asegurarse de que se guarde correctamente el cliente"""
-        if not change:  # Si es una creación nueva
-            import uuid
-            obj.uuid = uuid.uuid4()  # Asegurarse de que tenga un UUID
         super().save_model(request, obj, form, change)
 
 @admin.register(Coupon)
@@ -98,7 +95,7 @@ class CouponAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at', 'redeemed_at')
     search_fields = ('code', 'customer__first_name', 'customer__last_name', 'customer__email')
     readonly_fields = ('created_at',)
-    fields = ('customer', 'value', 'status', 'code', 'redeemed_at', 'redeemed_at_branch', 'created_at')
+    fields = ('customer', 'value', 'status', 'code', 'redeemed_at', 'redeemed_at_branch')
     
     actions = ['redeem_coupons']
     
@@ -108,11 +105,11 @@ class CouponAdmin(admin.ModelAdmin):
             import random
             import string
             # Generar un código único de 6 dígitos
-            while True:
+            code = ''.join(random.choices(string.digits, k=6))
+            # Verificar que el código no exista ya
+            while Coupon.objects.filter(code=code).exists():
                 code = ''.join(random.choices(string.digits, k=6))
-                if not Coupon.objects.filter(code=code).exists():
-                    obj.code = code
-                    break
+            obj.code = code
         super().save_model(request, obj, form, change)
     
     def redeem_coupons(self, request, queryset):

@@ -43,7 +43,7 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=20, verbose_name="Número de teléfono")
     qr_code = models.ForeignKey(QRCode, on_delete=models.CASCADE, related_name="customers", verbose_name="Código QR")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de registro")
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, verbose_name="UUID")
+    uuid = models.UUIDField(default=uuid.uuid4, editable=True, unique=True, verbose_name="UUID")
     
     class Meta:
         verbose_name = "Cliente"
@@ -52,6 +52,12 @@ class Customer(models.Model):
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+        
+    def save(self, *args, **kwargs):
+        """Asegurar que el cliente tenga un UUID válido"""
+        if not self.uuid:
+            self.uuid = uuid.uuid4()
+        super().save(*args, **kwargs)
 
 class Coupon(models.Model):
     """Modelo para representar cupones generados para los clientes"""
