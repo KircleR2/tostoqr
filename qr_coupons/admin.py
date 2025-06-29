@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils import timezone
-from django.urls import path
-from django.contrib.admin import AdminSite
+from django.urls import path, reverse
 from django.shortcuts import redirect
+from django.utils.html import format_html
 from .models import Branch, Customer, Coupon, QRCode
 from .forms import CouponAdminForm
 import random
@@ -13,58 +13,43 @@ admin.site.site_header = "Tosto QR Admin"
 admin.site.site_title = "Tosto QR Admin Portal"
 admin.site.index_title = "Bienvenido al Portal de Administración de Tosto QR"
 
-# Agregar enlace al generador de QR en el panel de administración
-admin.site.index_template = 'admin/custom_index.html'
+# Ya no usaremos la plantilla de índice personalizada para evitar posibles errores
+# admin.site.index_template = 'admin/custom_index.html'
 
-# Simplificamos el administrador de Branch para evitar problemas
+@admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
+    """
+    Administrador estándar para sucursales. Eliminamos la redirección
+    personalizada para restaurar la funcionalidad estándar y estable del admin.
+    """
     list_display = ('name', 'address', 'active')
-    
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('add/', self.admin_site.admin_view(self.redirect_to_branch_admin), name='qr_coupons_branch_add'),
-        ]
-        return custom_urls + urls
-    
-    def redirect_to_branch_admin(self, request):
-        """Redirigir a la vista personalizada de administración de sucursales"""
-        return redirect('admin_branch')
-    
-admin.site.register(Branch, BranchAdmin)
+    list_filter = ('active',)
+    search_fields = ('name', 'address')
 
-# Registrar QRCode pero ocultarlo del menú principal
 @admin.register(QRCode)
 class QRCodeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'uuid', 'created_at', 'active')
+    """
+    Administrador para códigos QR. Se eliminan las redirecciones y las
+    vistas personalizadas para estabilizar el sitio de administración.
+    """
+    list_display = ('name', 'uuid', 'created_at', 'active', 'image_preview')
     list_filter = ('active', 'created_at')
     search_fields = ('name', 'description')
     readonly_fields = ('uuid', 'created_at', 'image_preview')
     actions = ['duplicate_qrcode']
     
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('add/', self.admin_site.admin_view(self.redirect_to_qr_admin), name='qr_coupons_qrcode_add'),
-            path('<path:object_id>/change/', self.admin_site.admin_view(self.redirect_to_qr_admin), name='qr_coupons_qrcode_change'),
-        ]
-        return custom_urls + urls
-    
-    def redirect_to_qr_admin(self, request, object_id=None):
-        """Redirigir a la vista personalizada de administración de QR"""
-        return redirect('admin_qr')
-    
     def image_preview(self, obj):
-        """Mostrar una vista previa de la imagen QR"""
-        if obj.image_path:
-            return f'<img src="{obj.image_path}" width="150" height="150" />'
-        return "No hay imagen disponible"
+        """Muestra una vista previa segura de la imagen QR generada dinámicamente."""
+        if obj.id:  # Asegurarse de que el objeto ya ha sido guardado y tiene un ID
+            # Generar la URL a la vista que sirve la imagen directamente
+            url = reverse('generate_qr_specific', args=[obj.id])
+            return format_html('<img src="{}?direct=1&t={}" width="150" height="150" />', url, timezone.now().timestamp())
+        return "La imagen estará disponible después de guardar."
     
     image_preview.short_description = 'Vista previa del QR'
-    image_preview.allow_tags = True
     
     def duplicate_qrcode(self, request, queryset):
-        """Acción para duplicar un código QR"""
+        """Acción para duplicar códigos QR seleccionados."""
         for qr in queryset:
             QRCode.objects.create(
                 name=f"Copia de {qr.name}",
@@ -74,10 +59,6 @@ class QRCodeAdmin(admin.ModelAdmin):
         self.message_user(request, f"{queryset.count()} códigos QR fueron duplicados exitosamente.")
     
     duplicate_qrcode.short_description = "Duplicar códigos QR seleccionados"
-    
-    def has_module_permission(self, request):
-        """Ocultar este modelo del menú principal"""
-        return False
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -85,10 +66,6 @@ class CustomerAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'qr_code')
     search_fields = ('first_name', 'last_name', 'email', 'phone_number')
     readonly_fields = ('created_at', 'uuid')
-    
-    def save_model(self, request, obj, form, change):
-        """Asegurarse de que se guarde correctamente el cliente"""
-        super().save_model(request, obj, form, change)
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
@@ -102,39 +79,23 @@ class CouponAdmin(admin.ModelAdmin):
     actions = ['redeem_coupons']
     
     def save_model(self, request, obj, form, change):
-        """Generar un código único para el cupón si es nuevo"""
+        """Generar un código único para el cupón si es nuevo y no tiene código."""
         if not obj.code:
-            # Generar un código único de 6 dígitos
             code = ''.join(random.choices(string.digits, k=6))
-            # Verificar que el código no exista ya
             while Coupon.objects.filter(code=code).exists():
                 code = ''.join(random.choices(string.digits, k=6))
             obj.code = code
         super().save_model(request, obj, form, change)
     
     def redeem_coupons(self, request, queryset):
-        """Acción para marcar cupones como canjeados"""
-        # Solo permitir canjear cupones activos
+        """Acción para marcar cupones como canjeados."""
         active_coupons = queryset.filter(status='active')
         if not active_coupons:
             self.message_user(request, "No se seleccionaron cupones activos para canjear.")
             return
         
-        # Actualizar los cupones seleccionados
-        branch_id = request.POST.get('branch_id')
-        if branch_id:
-            try:
-                branch = Branch.objects.get(id=branch_id)
-                count = active_coupons.update(
-                    status='redeemed',
-                    redeemed_at=timezone.now(),
-                    redeemed_at_branch=branch
-                )
-                self.message_user(request, f"{count} cupones fueron canjeados exitosamente en {branch.name}.")
-            except Branch.DoesNotExist:
-                self.message_user(request, "La sucursal seleccionada no existe.")
-        else:
-            self.message_user(request, "Por favor, seleccione una sucursal para canjear los cupones.")
+        updated_count = active_coupons.update(status='redeemed', redeemed_at=timezone.now())
+        self.message_user(request, f"{updated_count} cupones fueron marcados como canjeados.")
     
     redeem_coupons.short_description = "Marcar cupones seleccionados como canjeados"
     
