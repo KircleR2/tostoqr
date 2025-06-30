@@ -23,7 +23,7 @@ def remove_duplicate_customers(apps, schema_editor):
             
             # Mantener el más reciente, eliminar el resto
             for customer in sorted_customers[1:]:
-                print(f"Eliminando cliente duplicado: {customer.id}, {customer.first_name} {customer.last_name}, {customer.phone_number}")
+                print(f"Eliminando cliente duplicado por teléfono: {customer.id}, {customer.first_name} {customer.last_name}, {customer.phone_number}")
                 customer.delete()
     
     # Hacer lo mismo para duplicados basados en email y qr_code
@@ -41,26 +41,20 @@ def remove_duplicate_customers(apps, schema_editor):
             sorted_customers = sorted(customers, key=lambda x: x.created_at, reverse=True)
             
             for customer in sorted_customers[1:]:
-                print(f"Eliminando cliente duplicado: {customer.id}, {customer.first_name} {customer.last_name}, {customer.email}")
+                print(f"Eliminando cliente duplicado por email: {customer.id}, {customer.first_name} {customer.last_name}, {customer.email}")
                 customer.delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("qr_coupons", "0008_alter_customer_unique_together"),
+        ("qr_coupons", "0007_qrcode_coupon_value_alter_coupon_value"),
     ]
 
     operations = [
-        # Eliminar la restricción única para poder corregir los datos
-        migrations.AlterUniqueTogether(
-            name="customer",
-            unique_together=set(),
-        ),
+        # Ejecutar la función para eliminar duplicados antes de aplicar la restricción
+        migrations.RunPython(remove_duplicate_customers, migrations.RunPython.noop),
         
-        # Ejecutar la función para eliminar duplicados
-        migrations.RunPython(remove_duplicate_customers),
-        
-        # Volver a aplicar la restricción única
+        # Aplicar la restricción única
         migrations.AlterUniqueTogether(
             name="customer",
             unique_together={("email", "qr_code"), ("phone_number", "qr_code")},
