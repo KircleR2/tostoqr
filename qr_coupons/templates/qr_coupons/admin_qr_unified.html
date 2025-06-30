@@ -257,11 +257,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <form method="post">
+                <form method="post" style="display: inline;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="qr_id" value="{{ selected_qr.id }}">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <button type="submit" class="btn btn-danger" style="position: relative; z-index: 1050;">Eliminar</button>
                 </form>
             </div>
         </div>
@@ -273,6 +273,7 @@
 <script src="{% static 'qr_coupons/js/timezone.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Código para regenerar QR
         const regenerateBtn = document.getElementById('regenerate-qr');
         if (regenerateBtn) {
             regenerateBtn.addEventListener('click', function() {
@@ -316,6 +317,28 @@
                     container.innerHTML = '<div class="alert alert-danger">Error al regenerar el código QR</div>';
                     console.error('Error:', error);
                 });
+            });
+        }
+
+        // Asegurar que el modal de eliminación funcione correctamente
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            // Para Bootstrap 4
+            $(deleteModal).on('shown.bs.modal', function (event) {
+                const deleteForm = deleteModal.querySelector('form');
+                if (deleteForm) {
+                    // Asegurar que el formulario esté visible y accesible
+                    deleteForm.style.display = 'inline';
+                    deleteForm.style.opacity = '1';
+                    deleteForm.style.position = 'static';
+                    
+                    // Asegurar que el botón de eliminar sea clickeable
+                    const deleteButton = deleteForm.querySelector('button[type="submit"]');
+                    if (deleteButton) {
+                        deleteButton.style.zIndex = '1050';
+                        deleteButton.style.position = 'relative';
+                    }
+                }
             });
         }
     });
