@@ -81,7 +81,9 @@
                             <dd class="col-sm-8">${{ coupon.value }} USD</dd>
                             
                             <dt class="col-sm-4">Fecha de canje:</dt>
-                            <dd class="col-sm-8">{{ coupon.redeemed_at|date:"d/m/Y H:i" }}</dd>
+                            <dd class="col-sm-8 local-datetime" data-datetime="{{ coupon.redeemed_at|date:'c' }}" data-format="DD/MM/YYYY HH:mm">
+                                {{ coupon.redeemed_at|date:"d/m/Y H:i" }}
+                            </dd>
                             
                             <dt class="col-sm-4">Sucursal:</dt>
                             <dd class="col-sm-8">{{ coupon.redeemed_at_branch.name }}</dd>
@@ -115,4 +117,8 @@
         <a href="{% url 'admin_qr' %}" class="btn btn-primary">Administrar Códigos QR</a>
     </div>
 </div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'qr_coupons/js/timezone.js' %}"></script>
 {% endblock %} 

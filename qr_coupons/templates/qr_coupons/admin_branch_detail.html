@@ -124,7 +124,9 @@
                                     <td>{{ coupon.customer.first_name }} {{ coupon.customer.last_name }}</td>
                                     <td>{{ coupon.customer.email }}</td>
                                     <td>{{ coupon.customer.phone_number }}</td>
-                                    <td>{{ coupon.redeemed_at|date:"d/m/Y H:i" }}</td>
+                                    <td class="local-datetime" data-datetime="{{ coupon.redeemed_at|date:'c' }}" data-format="DD/MM/YYYY HH:mm">
+                                        {{ coupon.redeemed_at|date:"d/m/Y H:i" }}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -146,6 +148,7 @@
 
 {% block extrajs %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{% static 'qr_coupons/js/timezone.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         flatpickr(".datepicker", {

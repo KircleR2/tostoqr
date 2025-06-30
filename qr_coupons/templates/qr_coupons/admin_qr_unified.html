@@ -184,7 +184,9 @@
                                         <dd class="col-sm-8">{{ selected_qr.uuid }}</dd>
                                         
                                         <dt class="col-sm-4">Fecha de creación:</dt>
-                                        <dd class="col-sm-8">{{ selected_qr.created_at|date:"d/m/Y H:i" }}</dd>
+                                        <dd class="col-sm-8 local-datetime" data-datetime="{{ selected_qr.created_at|date:'c' }}" data-format="DD/MM/YYYY HH:mm">
+                                            {{ selected_qr.created_at|date:"d/m/Y H:i" }}
+                                        </dd>
                                         
                                         <dt class="col-sm-4">Estado:</dt>
                                         <dd class="col-sm-8">
@@ -268,6 +270,7 @@
 {% endif %}
 
 {% block extrajs %}
+<script src="{% static 'qr_coupons/js/timezone.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const regenerateBtn = document.getElementById('regenerate-qr');
