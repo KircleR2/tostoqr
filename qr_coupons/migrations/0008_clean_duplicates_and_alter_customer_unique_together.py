@@ -44,13 +44,22 @@ def remove_duplicate_customers(apps, schema_editor):
                 print(f"Eliminando cliente duplicado por email: {customer.id}, {customer.first_name} {customer.last_name}, {customer.email}")
                 customer.delete()
 
+def clear_pending_triggers(apps, schema_editor):
+    """Ejecutar SQL para limpiar eventos de trigger pendientes"""
+    if schema_editor.connection.vendor == 'postgresql':
+        schema_editor.execute("SET CONSTRAINTS ALL IMMEDIATE;")
 
 class Migration(migrations.Migration):
+    atomic = False  # Deshabilitar transacciones atómicas para evitar bloqueos
+    
     dependencies = [
         ("qr_coupons", "0007_qrcode_coupon_value_alter_coupon_value"),
     ]
 
     operations = [
+        # Limpiar eventos de trigger pendientes
+        migrations.RunPython(clear_pending_triggers, migrations.RunPython.noop),
+        
         # Ejecutar la función para eliminar duplicados antes de aplicar la restricción
         migrations.RunPython(remove_duplicate_customers, migrations.RunPython.noop),
         
