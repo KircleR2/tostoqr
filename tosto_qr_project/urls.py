@@ -19,11 +19,18 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
-from qr_coupons.admin_views import admin_qr_view, verify_coupon_view, admin_create_qr_view
+from qr_coupons.admin_views import admin_qr_view, verify_coupon_view, admin_create_qr_view, admin_branch_view, admin_branch_detail_view
+
+# Redirigir la URL del admin de Branch a nuestra vista personalizada
+admin.site.admin_view(lambda request, path: RedirectView.as_view(url='/admin/branch/')(request) if path == 'qr_coupons/branch/' else None)
 
 urlpatterns = [
     # Primero incluimos las URLs personalizadas de la aplicación
     path('', include('qr_coupons.urls')),
+    
+    # Rutas personalizadas para el admin
+    path('admin/branch/', admin_branch_view, name='admin_branch'),
+    path('admin/branch/<int:branch_id>/', admin_branch_detail_view, name='admin_branch_detail'),
     
     # Luego incluimos las URLs del administrador de Django
     path('admin/', admin.site.urls),

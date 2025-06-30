@@ -5,7 +5,7 @@ from . import admin_views
 
 urlpatterns = [
     # Redirección desde la URL raíz al panel de administración
-    path('', RedirectView.as_view(url='/admin/', permanent=False), name='index'),
+    path('', RedirectView.as_view(pattern_name='admin:index', permanent=False), name='index'),
     
     # URLs para usuarios finales
     path('register/<uuid:qr_uuid>/', views.register_form_view, name='register_form'),
@@ -18,7 +18,4 @@ urlpatterns = [
     # URLs para administración personalizada
     path('admin/qr-code/', admin_views.admin_qr_view, name='admin_qr'),
     path('admin/verify-coupon/', admin_views.verify_coupon_view, name='admin_verify_coupon'),
-    
-    # Nueva URL para la vista personalizada de sucursales
-    path('admin/branch/', admin_views.admin_branch_view, name='admin_branch'),
 ] 

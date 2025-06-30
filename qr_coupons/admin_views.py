@@ -13,6 +13,9 @@ import qrcode
 from io import BytesIO
 import base64
 from django.urls import reverse
+from django.http import HttpResponse
+import csv
+from django.db.models import Count
 
 @staff_member_required
 def admin_qr_view(request):
@@ -200,7 +203,12 @@ def generate_qr_image(request, uuid_value):
 @staff_member_required
 def admin_branch_view(request):
     """Vista personalizada para crear sucursales"""
+    # Obtener todas las sucursales con conteo de cupones canjeados
     branches = Branch.objects.all().order_by('name')
+    
+    # Añadir el conteo de cupones canjeados a cada sucursal
+    for branch in branches:
+        branch.redeemed_count = Coupon.objects.filter(redeemed_at_branch=branch, status='redeemed').count()
     
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -214,17 +222,78 @@ def admin_branch_view(request):
                 active=active
             )
             messages.success(request, f'Sucursal "{name}" creada exitosamente.')
-            return redirect('admin:qr_coupons_branch_changelist')
+            return redirect('admin_branch')
         else:
             messages.error(request, 'Por favor complete todos los campos requeridos.')
     
-    return render(request, 'qr_coupons/admin_branch.html', {
+    context = site.each_context(request)
+    context.update({
         'branches': branches,
-        'title': 'Crear Sucursal',
-        'site_title': 'Tosto QR Admin',
-        'site_header': 'Tosto QR',
-        'has_permission': True,
-        'is_popup': False,
-        'is_nav_sidebar_enabled': True,
-        'available_apps': [],
-    }) 
+        'title': 'Administración de Sucursales',
+    })
+    return render(request, 'qr_coupons/admin_branch.html', context)
+
+@staff_member_required
+def admin_branch_detail_view(request, branch_id):
+    """Vista para mostrar detalles de una sucursal, incluyendo cupones canjeados"""
+    branch = get_object_or_404(Branch, id=branch_id)
+    
+    # Obtener todos los cupones canjeados en esta sucursal
+    coupons = Coupon.objects.filter(redeemed_at_branch=branch, status='redeemed').order_by('-redeemed_at')
+    
+    # Estadísticas
+    total_coupons = coupons.count()
+    
+    # Agrupar por valor del cupón
+    coupon_values = {}
+    for coupon in coupons:
+        value = coupon.value
+        if value in coupon_values:
+            coupon_values[value] += 1
+        else:
+            coupon_values[value] = 1
+    
+    # Filtrar por fecha si se especifica
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    if start_date:
+        coupons = coupons.filter(redeemed_at__gte=start_date)
+    
+    if end_date:
+        # Añadir un día para incluir todo el día final
+        end_date_obj = timezone.datetime.strptime(end_date, '%Y-%m-%d')
+        end_date_obj = end_date_obj + timezone.timedelta(days=1)
+        coupons = coupons.filter(redeemed_at__lt=end_date_obj)
+    
+    # Exportar a CSV si se solicita
+    if 'export' in request.GET:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="cupones_canjeados_{branch.name}_{timezone.now().strftime("%Y%m%d")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Código', 'Valor', 'Cliente', 'Email', 'Teléfono', 'Fecha de Canje'])
+        
+        for coupon in coupons:
+            writer.writerow([
+                coupon.code,
+                coupon.value,
+                f"{coupon.customer.first_name} {coupon.customer.last_name}",
+                coupon.customer.email,
+                coupon.customer.phone_number,
+                coupon.redeemed_at.strftime('%d/%m/%Y %H:%M')
+            ])
+        
+        return response
+    
+    context = site.each_context(request)
+    context.update({
+        'branch': branch,
+        'coupons': coupons,
+        'total_coupons': total_coupons,
+        'coupon_values': coupon_values,
+        'start_date': start_date,
+        'end_date': end_date,
+        'title': f'Detalles de Sucursal: {branch.name}',
+    })
+    return render(request, 'qr_coupons/admin_branch_detail.html', context) 

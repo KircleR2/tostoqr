@@ -1,0 +1,45 @@
+{% extends "admin/app_list.html" %}
+{% load i18n %}
+
+{% block app_list %}
+{{ block.super }}
+
+{% if app_list %}
+<div class="app-qr_coupons module">
+    <table>
+        <caption>
+            <a href="#" class="section" title="Acciones personalizadas">Acciones personalizadas</a>
+        </caption>
+        <tbody>
+            <tr>
+                <th scope="row">
+                    <a href="{% url 'admin_branch' %}">
+                        <i class="fas fa-store"></i> Administración de Sucursales
+                    </a>
+                </th>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <a href="{% url 'admin_qr' %}">
+                        <i class="fas fa-qrcode"></i> Administración de Códigos QR
+                    </a>
+                </th>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <a href="{% url 'admin_verify_coupon' %}">
+                        <i class="fas fa-ticket-alt"></i> Verificar y Canjear Cupones
+                    </a>
+                </th>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %} 

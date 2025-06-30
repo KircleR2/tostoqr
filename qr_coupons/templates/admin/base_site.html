@@ -1,0 +1,28 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block nav-sidebar %}
+{{ block.super }}
+<nav class="sidebar-nav">
+    <div class="sidebar-section">
+        <h4 class="sidebar-title">Acciones Rápidas</h4>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{% url 'admin_branch' %}" class="sidebar-link">
+                    <i class="fas fa-store"></i> Administración de Sucursales
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin_qr' %}" class="sidebar-link">
+                    <i class="fas fa-qrcode"></i> Administración de Códigos QR
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin_verify_coupon' %}" class="sidebar-link">
+                    <i class="fas fa-ticket-alt"></i> Verificar y Canjear Cupones
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %} 

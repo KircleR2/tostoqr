@@ -3,4 +3,45 @@
 
 {% block content %}
 {{ block.super }}
+
+<div class="module">
+    <h2>Acciones Rápidas</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Códigos QR</h5>
+                </div>
+                <div class="card-body">
+                    <p>Crear y administrar códigos QR para promociones.</p>
+                    <a href="{% url 'admin_qr' %}" class="btn btn-outline-primary">Gestionar QR</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Verificar Cupones</h5>
+                </div>
+                <div class="card-body">
+                    <p>Verificar y canjear cupones de clientes.</p>
+                    <a href="{% url 'admin_verify_coupon' %}" class="btn btn-outline-success">Verificar Cupón</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Sucursales</h5>
+                </div>
+                <div class="card-body">
+                    <p>Administrar sucursales y ver estadísticas.</p>
+                    <a href="{% url 'admin_branch' %}" class="btn btn-outline-info">Gestionar Sucursales</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

@@ -56,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "qr_coupons.middleware.RedirectBranchAdminMiddleware",
 ]
 
 ROOT_URLCONF = "tosto_qr_project.urls"
@@ -207,6 +208,10 @@ JAZZMIN_SETTINGS = {
             "name": "Verificar y Canjear Cupones",
             "url": "admin_verify_coupon",
             "icon": "fas fa-ticket-alt",
+        }, {
+            "name": "Administración de Sucursales",
+            "url": "admin_branch",
+            "icon": "fas fa-store",
         }],
     },
     
@@ -223,7 +228,6 @@ JAZZMIN_SETTINGS = {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
-        "qr_coupons.branch": "fas fa-store",
         "qr_coupons.customer": "fas fa-user-friends",
         "qr_coupons.coupon": "fas fa-ticket-alt",
     },
@@ -267,12 +271,4 @@ JAZZMIN_UI_TWEAKS = {
         "danger": "btn-danger",
         "success": "btn-success"
     }
-}
-
-# Configuración del menú personalizado
-JAZZMIN_SETTINGS["custom_links"] = {
-    "qr_coupons": [
-        {"name": "Códigos QR", "url": "admin_qr", "icon": "fas fa-qrcode"},
-        {"name": "Verificar y Canjear Cupones", "url": "admin_verify_coupon", "icon": "fas fa-ticket-alt"},
-    ]
 }

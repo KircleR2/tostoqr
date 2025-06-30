@@ -4,6 +4,7 @@ from django.urls import path
 from django.contrib.admin import AdminSite
 from django.shortcuts import redirect
 from .models import Branch, Customer, Coupon, QRCode
+from . import admin_views
 
 # Personalizar el sitio de administración
 admin.site.site_header = "Tosto QR Admin"
@@ -13,11 +14,31 @@ admin.site.index_title = "Bienvenido al Portal de Administración de Tosto QR"
 # Agregar enlace al generador de QR en el panel de administración
 admin.site.index_template = 'admin/custom_index.html'
 
-# Simplificamos el administrador de Branch para evitar problemas
+# Guardar la función original get_urls
+original_get_urls = AdminSite.get_urls
+
+# Sobrescribir el método get_urls
+def custom_get_urls(self):
+    urls = original_get_urls(self)
+    custom_urls = [
+        path('branch/', admin_views.admin_branch_view, name='admin_branch'),
+        path('branch/<int:branch_id>/', admin_views.admin_branch_detail_view, name='admin_branch_detail'),
+        path('qr-code/', admin_views.admin_qr_view, name='admin_qr'),
+        path('verify-coupon/', admin_views.verify_coupon_view, name='admin_verify_coupon'),
+    ]
+    return custom_urls + urls
+
+# Reemplazar el método get_urls del AdminSite
+AdminSite.get_urls = custom_get_urls
+
+# Registrar Branch pero ocultarlo del menú principal
+@admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'active')
     
-admin.site.register(Branch, BranchAdmin)
+    def has_module_permission(self, request):
+        """Ocultar este modelo del menú principal para redirigir a nuestra vista personalizada."""
+        return False
 
 # Registrar QRCode pero ocultarlo del menú principal
 @admin.register(QRCode)
