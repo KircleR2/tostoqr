@@ -2,7 +2,6 @@ services:
   - type: web
     name: tostoqr
     runtime: python
-    python_version: 3.11.0
     buildCommand: "./build.sh"
     startCommand: "gunicorn tosto_qr_project.wsgi:application"
     envVars:
