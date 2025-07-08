@@ -16,8 +16,11 @@ services:
         value: "False"
       - key: ALLOWED_HOSTS
         value: ".onrender.com,localhost,127.0.0.1"
+    plan: free
 
 databases:
   - name: tostoqr-db
     databaseName: tostoqr
-    user: tostoqr 
+    user: tostoqr
+    plan: free
+    ipAllowList: [] 
