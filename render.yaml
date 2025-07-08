@@ -2,7 +2,7 @@ services:
   - type: web
     name: tostoqr
     runtime: python
-    pythonVersion: 3.11.0
+    python_version: 3.11.0
     buildCommand: "./build.sh"
     startCommand: "gunicorn tosto_qr_project.wsgi:application"
     envVars:
@@ -16,11 +16,8 @@ services:
         value: "False"
       - key: ALLOWED_HOSTS
         value: ".onrender.com,localhost,127.0.0.1"
-    plan: free
 
 databases:
   - name: tostoqr-db
     databaseName: tostoqr
-    user: tostoqr
-    plan: free
-    ipAllowList: [] 
+    user: tostoqr 
