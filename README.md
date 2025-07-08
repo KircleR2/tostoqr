@@ -1,68 +1,140 @@
 # Tosto QR
 
-Sistema de administración de códigos QR para cupones promocionales.
+A QR code management system for promotional coupons.
 
-## Descripción
+![Tosto QR Logo](static/images/logo.png)
 
-Tosto QR es una aplicación web desarrollada en Django que permite generar códigos QR que dirigen a un formulario de registro. Al completar el formulario, los usuarios reciben un código de 6 dígitos como cupón canjeable en sucursales.
+## Overview
 
-## Características
+Tosto QR is a Django web application that generates QR codes linked to registration forms. When customers scan a QR code and complete the registration form, they receive a unique 6-digit code that can be redeemed at participating branches.
 
-- Generación de códigos QR personalizados
-- Formulario de registro para clientes
-- Sistema de cupones con códigos de 6 dígitos
-- Panel de administración para gestionar códigos QR, clientes y cupones
-- Verificación y canje de cupones en sucursales
+## Features
 
-## Requisitos
+- **QR Code Management**: Create, edit, and manage custom QR codes
+- **Customer Registration**: User-friendly form for customer data collection
+- **Coupon System**: Automatic generation of unique 6-digit coupon codes
+- **Branch Management**: Track and manage multiple business locations
+- **Redemption System**: Verify and redeem coupons at branch locations
+- **Admin Dashboard**: Comprehensive management interface for all system components
+- **Timezone Support**: Displays dates in the user's local timezone (default: America/Panama)
+- **Multi-language Support**: Available in English and Spanish
+
+## Technology Stack
+
+- **Backend**: Django 5.2.3
+- **Database**: PostgreSQL (production), SQLite (development)
+- **Frontend**: HTML, CSS, JavaScript
+- **Deployment**: Render.com
+- **Admin Interface**: Django Jazzmin
+- **Static Files**: WhiteNoise
+- **QR Generation**: qrcode library
+
+## Installation
+
+### Prerequisites
 
 - Python 3.8+
-- Django 5.2.3
-- Otras dependencias en `requirements.txt`
+- pip (Python package manager)
+- Git
 
-## Instalación
+### Setup
 
-1. Clonar el repositorio:
-   ```
-   git clone https://github.com/yourusername/tostoqr.git
-   cd tostoqr
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/tosto_qr.git
+   cd tosto_qr
    ```
 
-2. Crear un entorno virtual e instalar dependencias:
-   ```
+2. Create and activate a virtual environment:
+   ```bash
    python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. Configurar variables de entorno:
-   - Crear un archivo `.env` basado en `.env.example`
-   - Ajustar las variables según sea necesario
-
-4. Aplicar migraciones:
+4. Set up environment variables:
+   Create a `.env` file in the project root with the following variables:
    ```
+   SECRET_KEY=your_secret_key
+   DEBUG=True
+   ALLOWED_HOSTS=localhost,127.0.0.1
+   
+   # Email settings (optional for development)
+   EMAIL_HOST=smtp.example.com
+   EMAIL_PORT=587
+   EMAIL_USE_TLS=True
+   EMAIL_HOST_USER=your_email@example.com
+   EMAIL_HOST_PASSWORD=your_password
+   DEFAULT_FROM_EMAIL=noreply@tostoqr.com
+   ```
+
+5. Run migrations:
+   ```bash
    python manage.py migrate
    ```
 
-5. Crear un superusuario:
-   ```
+6. Create a superuser:
+   ```bash
    python manage.py createsuperuser
    ```
 
-6. Ejecutar el servidor de desarrollo:
-   ```
+7. Run the development server:
+   ```bash
    python manage.py runserver
    ```
 
-## Despliegue en Render
+8. Access the application at http://127.0.0.1:8000/
 
-1. Crear una nueva aplicación web en Render
-2. Conectar con el repositorio de GitHub
-3. Configurar como tipo "Web Service"
-4. Configurar el comando de inicio: `gunicorn tosto_qr_project.wsgi:application`
-5. Agregar las variables de entorno necesarias
-6. ¡Listo! Render se encargará del despliegue automáticamente
+## Usage
 
-## Licencia
+### Admin Interface
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles. 
+1. Log in to the admin interface at `/admin/` using your superuser credentials
+2. Create branches where coupons can be redeemed
+3. Generate QR codes with custom descriptions and coupon values
+4. View registered customers and generated coupons
+
+### QR Code Workflow
+
+1. **Create QR Code**: Admin creates a QR code with description and coupon value
+2. **Customer Registration**: Customers scan QR code and complete registration form
+3. **Coupon Generation**: System automatically generates a unique 6-digit coupon code
+4. **Email Notification**: Customer receives coupon code via email
+5. **Redemption**: Customer presents code at branch, staff verifies and redeems it
+
+### Branch Management
+
+Branch staff can access a specialized interface to:
+- Verify coupon validity
+- Redeem coupons
+- View redemption statistics
+
+## Deployment on Render
+
+Tosto QR is configured for easy deployment on Render.com:
+
+1. Create a new Web Service on Render
+2. Connect to your GitHub repository
+3. Use the following settings:
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `gunicorn tosto_qr_project.wsgi:application`
+4. Add the required environment variables:
+   - `SECRET_KEY` (can be auto-generated by Render)
+   - `DEBUG` (set to "False")
+   - `ALLOWED_HOSTS` (include your Render domain)
+   - Email configuration variables if needed
+5. Add a PostgreSQL database and link it to your service
+
+The `build.sh` script will handle database migrations and static file collection automatically.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For questions or support, please contact [your-email@example.com](mailto:your-email@example.com) 
