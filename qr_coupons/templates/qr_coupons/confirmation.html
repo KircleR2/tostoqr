@@ -21,7 +21,12 @@
                         <h2 class="display-4 font-weight-bold">{{ coupon.code }}</h2>
                     </div>
                     <p><strong>Valor del cupón:</strong> {{ coupon.value }}</p>
-                    <p class="text-warning"><strong>¡IMPORTANTE!</strong> Toma una captura de pantalla de este cupón para guardarlo.</p>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-envelope mr-2"></i> Hemos enviado este código a tu correo electrónico <strong>{{ customer.email }}</strong>
+                    </div>
+                    
+                    <p class="text-muted mt-3">Si no recibes el correo en unos minutos, revisa tu carpeta de spam.</p>
                 </div>
             </div>
         </div>

@@ -165,6 +165,11 @@ else:
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@tostoqr.com')
 
+# Mailgun configuration
+MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '')
+MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '')
+MAILGUN_SENDER = os.environ.get('MAILGUN_SENDER', DEFAULT_FROM_EMAIL)
+
 # Configuración de seguridad para producción
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000  # 1 año

@@ -6,6 +6,7 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.db import IntegrityError
 from .models import Customer, Coupon, QRCode
 from .forms import CustomerForm
+from .utils import send_coupon_email
 import qrcode
 from io import BytesIO
 import os
@@ -53,13 +54,17 @@ def register_form_view(request, qr_uuid=None):
                 while Coupon.objects.filter(code=code).exists():
                     code = ''.join(random.choices(string.digits, k=6))
                     
-                Coupon.objects.create(
+                coupon = Coupon.objects.create(
                     customer=customer,
                     code=code,
                     value=qr_code.coupon_value,
                     status='active'
                 )
                 
+                # Enviar el correo con el código del cupón
+                email_sent = send_coupon_email(customer, coupon)
+                
+                # Redirigir a la página de confirmación
                 return redirect('confirmation', customer_uuid=customer.uuid)
             except IntegrityError:
                 messages.error(request, "Ha ocurrido un error al registrar tus datos. Es posible que ya te hayas registrado anteriormente.")
@@ -82,7 +87,8 @@ def confirmation_view(request, customer_uuid):
     
     return render(request, 'qr_coupons/confirmation.html', {
         'customer': customer,
-        'coupon': coupon
+        'coupon': coupon,
+        'email_sent': True
     })
 
 def error_view(request):

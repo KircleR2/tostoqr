@@ -9,6 +9,7 @@ psycopg2-binary==2.9.10
 pypng==0.20220715.0
 python-dotenv==1.0.1
 qrcode==7.4.2
+requests==2.32.4
 sqlparse==0.5.3
 typing_extensions==4.14.0
 whitenoise==6.6.0
