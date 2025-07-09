@@ -14,6 +14,9 @@ import uuid
 import random
 import string
 from PIL import Image
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Directorio para guardar las imágenes QR
 QR_IMAGES_DIR = os.path.join('qr_coupons', 'static', 'qr_coupons', 'images')
@@ -63,6 +66,11 @@ def register_form_view(request, qr_uuid=None):
                 
                 # Enviar el correo con el código del cupón
                 email_sent = send_coupon_email(customer, coupon)
+                
+                if not email_sent:
+                    logger.warning(f"Failed to send email to {customer.email} for coupon {coupon.code}")
+                    # El email no se envió, pero continuamos con el flujo normal
+                    # El usuario aún puede ver su código en la página de confirmación
                 
                 # Redirigir a la página de confirmación
                 return redirect('confirmation', customer_uuid=customer.uuid)
