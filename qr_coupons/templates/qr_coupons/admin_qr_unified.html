@@ -2,6 +2,32 @@
 {% load i18n %}
 {% load static %}
 
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">
+<style>
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+    .modal {
+        z-index: 1050 !important;
+    }
+    .modal-dialog {
+        margin: 2rem auto;
+    }
+    .modal-content {
+        box-shadow: 0 5px 15px rgba(0,0,0,.5);
+    }
+    .modal-footer form {
+        display: inline-block;
+        margin-bottom: 0;
+    }
+    .modal-footer .btn {
+        position: relative;
+        z-index: 1060;
+    }
+</style>
+{% endblock %}
+
 {% block title %}Administración de Códigos QR - Tosto Coffee Admin{% endblock %}
 
 {% block breadcrumbs %}
@@ -257,11 +283,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <form method="post" style="display: inline;">
+                <form method="post" action="{% url 'admin_qr' %}" id="delete-qr-form">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="qr_id" value="{{ selected_qr.id }}">
-                    <button type="submit" class="btn btn-danger" style="position: relative; z-index: 1050;">Eliminar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
                 </form>
             </div>
         </div>
@@ -270,6 +296,8 @@
 {% endif %}
 
 {% block extrajs %}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'qr_coupons/js/timezone.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -325,21 +353,27 @@
         if (deleteModal) {
             // Para Bootstrap 4
             $(deleteModal).on('shown.bs.modal', function (event) {
-                const deleteForm = deleteModal.querySelector('form');
+                const deleteForm = document.getElementById('delete-qr-form');
                 if (deleteForm) {
                     // Asegurar que el formulario esté visible y accesible
-                    deleteForm.style.display = 'inline';
-                    deleteForm.style.opacity = '1';
-                    deleteForm.style.position = 'static';
+                    deleteForm.style.display = 'inline-block';
                     
                     // Asegurar que el botón de eliminar sea clickeable
                     const deleteButton = deleteForm.querySelector('button[type="submit"]');
                     if (deleteButton) {
-                        deleteButton.style.zIndex = '1050';
-                        deleteButton.style.position = 'relative';
+                        deleteButton.focus(); // Dar foco al botón para facilitar su uso
                     }
                 }
             });
+            
+            // Manejar el envío del formulario
+            const deleteForm = document.getElementById('delete-qr-form');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(event) {
+                    // No es necesario prevenir el comportamiento predeterminado
+                    console.log('Formulario de eliminación enviado');
+                });
+            }
         }
     });
 </script>
