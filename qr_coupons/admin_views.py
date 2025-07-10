@@ -297,3 +297,27 @@ def admin_branch_detail_view(request, branch_id):
         'title': f'Detalles de Sucursal: {branch.name}',
     })
     return render(request, 'qr_coupons/admin_branch_detail.html', context) 
+
+@staff_member_required
+def admin_qr_delete_confirm_view(request, qr_id):
+    """Vista para confirmar la eliminación de un código QR"""
+    try:
+        qr_code = QRCode.objects.get(id=qr_id)
+    except QRCode.DoesNotExist:
+        messages.error(request, "El código QR no existe.")
+        return redirect('admin_qr')
+    
+    if request.method == 'POST':
+        # Si es POST, eliminar el QR y redirigir
+        name = qr_code.name
+        qr_code.delete()
+        messages.success(request, f"Código QR '{name}' eliminado exitosamente.")
+        return redirect('admin_qr')
+    
+    # Si es GET, mostrar la página de confirmación
+    context = site.each_context(request)
+    context.update({
+        'qr_code': qr_code,
+        'title': 'Confirmar Eliminación',
+    })
+    return render(request, 'qr_coupons/admin_qr_delete_confirm.html', context) 
