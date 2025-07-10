@@ -165,10 +165,10 @@ else:
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@tostoqr.com')
 
-# Mailgun configuration
-MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '')
-MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '')
-MAILGUN_SENDER = os.environ.get('MAILGUN_SENDER', DEFAULT_FROM_EMAIL)
+# Plunk configuration
+PLUNK_API_KEY = os.environ.get('PLUNK_API_KEY', 'sk_550494c612156211f9dfd5e4e4d4161f37f795ccddc5af19')
+PLUNK_SENDER_EMAIL = os.environ.get('PLUNK_SENDER_EMAIL', DEFAULT_FROM_EMAIL)
+PLUNK_SENDER_NAME = os.environ.get('PLUNK_SENDER_NAME', 'Tosto QR')
 
 # Configuración de seguridad para producción
 if not DEBUG:

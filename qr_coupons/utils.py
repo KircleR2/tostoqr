@@ -4,9 +4,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def send_mailgun_email(to_email, subject, text_content, html_content=None):
+def send_plunk_email(to_email, subject, text_content, html_content=None):
     """
-    Send an email using the Mailgun API.
+    Send an email using the Plunk API.
     
     Args:
         to_email (str): Recipient email address
@@ -18,32 +18,32 @@ def send_mailgun_email(to_email, subject, text_content, html_content=None):
         bool: True if the email was sent successfully, False otherwise
     """
     try:
-        # Check if Mailgun is properly configured
-        if not all([
-            settings.MAILGUN_API_KEY,
-            settings.MAILGUN_DOMAIN,
-            settings.MAILGUN_SENDER
-        ]):
-            logger.error("Mailgun is not properly configured. Check MAILGUN_API_KEY, MAILGUN_DOMAIN, and MAILGUN_SENDER settings.")
+        # Check if Plunk is properly configured
+        if not settings.PLUNK_API_KEY:
+            logger.error("Plunk is not properly configured. Check PLUNK_API_KEY setting.")
             return False
         
         # Prepare the email data
         data = {
-            'from': settings.MAILGUN_SENDER,
-            'to': to_email,
-            'subject': subject,
-            'text': text_content,
+            "to": to_email,
+            "subject": subject,
+            "body": html_content if html_content else text_content,
+            "from": {
+                "email": settings.PLUNK_SENDER_EMAIL,
+                "name": settings.PLUNK_SENDER_NAME
+            }
         }
         
-        # Add HTML content if provided
-        if html_content:
-            data['html'] = html_content
+        # Send the email using Plunk API
+        headers = {
+            "Authorization": f"Bearer {settings.PLUNK_API_KEY}",
+            "Content-Type": "application/json"
+        }
         
-        # Send the email using Mailgun API
         response = requests.post(
-            f"https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages",
-            auth=("api", settings.MAILGUN_API_KEY),
-            data=data
+            "https://api.useplunk.com/v1/send",
+            json=data,
+            headers=headers
         )
         
         # Check if the request was successful
@@ -69,20 +69,20 @@ def send_coupon_email(customer, coupon):
     Returns:
         bool: True if the email was sent successfully, False otherwise
     """
-    subject = 'Tu código del cupón Tosto Coffee'
+    subject = 'Tu código de cupón Tosto QR'
     
     # Plain text email
     text_content = f"""
 Hola {customer.first_name},
 
-Gracias por registrarte en Tosto Coffee. Tu código del cupón es: {coupon.code}
+Gracias por registrarte en Tosto QR. Tu código de cupón es: {coupon.code}
 
 Puedes canjearlo en cualquiera de nuestras sucursales presentando este código.
 
 Valor del cupón: {coupon.value}
 
 Saludos,
-Equipo Tosto Coffee
+Equipo Tosto QR
     """
     
     # HTML email
@@ -106,7 +106,7 @@ Equipo Tosto Coffee
         </div>
         <div class="content">
             <p>Hola <strong>{customer.first_name}</strong>,</p>
-            <p>Gracias por registrarte en Tosto Coffee. Tu código de cupón es:</p>
+            <p>Gracias por registrarte en Tosto QR. Tu código de cupón es:</p>
             
             <div class="coupon-code">
                 <h2>{coupon.code}</h2>
@@ -116,11 +116,11 @@ Equipo Tosto Coffee
             <p><strong>Valor del cupón:</strong> {coupon.value}</p>
         </div>
         <div class="footer">
-            <p>Saludos,<br>Equipo Tosto Coffee</p>
+            <p>Saludos,<br>Equipo Tosto QR</p>
         </div>
     </div>
 </body>
 </html>
     """
     
-    return send_mailgun_email(customer.email, subject, text_content, html_content) 
+    return send_plunk_email(customer.email, subject, text_content, html_content) 
