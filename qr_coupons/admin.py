@@ -7,9 +7,9 @@ from .models import Branch, Customer, Coupon, QRCode
 from . import admin_views
 
 # Personalizar el sitio de administración
-admin.site.site_header = "Tosto QR Admin"
-admin.site.site_title = "Tosto QR Admin Portal"
-admin.site.index_title = "Bienvenido al Portal de Administración de Tosto QR"
+admin.site.site_header = "Tosto Coffee Admin"
+admin.site.site_title = "Tosto Coffee Admin Portal"
+admin.site.index_title = "Bienvenido al Portal de Administración de Tosto Coffee"
 
 # Agregar enlace al generador de QR en el panel de administración
 admin.site.index_template = 'admin/custom_index.html'

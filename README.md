@@ -1,12 +1,12 @@
-# Tosto QR
+# Tosto Coffee
 
 A QR code management system for promotional coupons.
 
-![Tosto QR Logo](static/images/logo.png)
+![Tosto Coffee Logo](static/images/logo.png)
 
 ## Overview
 
-Tosto QR is a Django web application that generates QR codes linked to registration forms. When customers scan a QR code and complete the registration form, they receive a unique 6-digit code that can be redeemed at participating branches.
+Tosto Coffee is a Django web application that generates QR codes linked to registration forms. When customers scan a QR code and complete the registration form, they receive a unique 6-digit code that can be redeemed at participating branches.
 
 ## Features
 
@@ -115,7 +115,7 @@ Branch staff can access a specialized interface to:
 
 ## Deployment on Render
 
-Tosto QR is configured for easy deployment on Render.com:
+Tosto Coffee is configured for easy deployment on Render.com:
 
 1. Create a new Web Service on Render
 2. Connect to your GitHub repository

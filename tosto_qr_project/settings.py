@@ -168,7 +168,7 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@tostoqr.com')
 # Plunk configuration
 PLUNK_API_KEY = os.environ.get('PLUNK_API_KEY', 'sk_550494c612156211f9dfd5e4e4d4161f37f795ccddc5af19')
 PLUNK_SENDER_EMAIL = os.environ.get('PLUNK_SENDER_EMAIL', DEFAULT_FROM_EMAIL)
-PLUNK_SENDER_NAME = os.environ.get('PLUNK_SENDER_NAME', 'Tosto QR')
+PLUNK_SENDER_NAME = os.environ.get('PLUNK_SENDER_NAME', 'Tosto Coffee')
 
 # Configuración de seguridad para producción
 if not DEBUG:
@@ -183,13 +183,13 @@ if not DEBUG:
 # Configuración de Jazzmin (tema de administración)
 JAZZMIN_SETTINGS = {
     # Título en la barra de navegación
-    "site_title": "Tosto QR Admin",
+    "site_title": "Tosto Coffee Admin",
     
     # Título en el inicio de sesión
-    "site_header": "Tosto QR",
+    "site_header": "Tosto Coffee",
     
     # Título en la página de inicio
-    "site_brand": "Tosto QR",
+    "site_brand": "Tosto Coffee",
     
     # Logo para su marca en la página de inicio de sesión
     "site_logo": None,
@@ -198,10 +198,10 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     
     # Imagen de bienvenida (si None, se usará site_logo)
-    "welcome_sign": "Bienvenido al Panel de Administración de Tosto QR",
+    "welcome_sign": "Bienvenido al Panel de Administración de Tosto Coffee",
     
     # Copyright en el pie de página
-    "copyright": "Tosto QR",
+    "copyright": "Tosto Coffee",
     
     # Lista de menús personalizados
     "custom_links": {

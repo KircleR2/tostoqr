@@ -69,20 +69,20 @@ def send_coupon_email(customer, coupon):
     Returns:
         bool: True if the email was sent successfully, False otherwise
     """
-    subject = 'Tu código de cupón Tosto QR'
+    subject = 'Tu código de cupón Tosto Coffee'
     
     # Plain text email
     text_content = f"""
 Hola {customer.first_name},
 
-Gracias por registrarte en Tosto QR. Tu código de cupón es: {coupon.code}
+Gracias por registrarte en Tosto Coffee. Tu código de cupón es: {coupon.code}
 
 Puedes canjearlo en cualquiera de nuestras sucursales presentando este código.
 
 Valor del cupón: {coupon.value}
 
 Saludos,
-Equipo Tosto QR
+Equipo Tosto Coffee
     """
     
     # HTML email
@@ -102,11 +102,11 @@ Equipo Tosto QR
 <body>
     <div class="container">
         <div class="header">
-            <h1>Tosto QR</h1>
+            <h1>Tosto Coffee</h1>
         </div>
         <div class="content">
             <p>Hola <strong>{customer.first_name}</strong>,</p>
-            <p>Gracias por registrarte en Tosto QR. Tu código de cupón es:</p>
+            <p>Gracias por registrarte en Tosto Coffee. Tu código de cupón es:</p>
             
             <div class="coupon-code">
                 <h2>{coupon.code}</h2>
@@ -116,7 +116,7 @@ Equipo Tosto QR
             <p><strong>Valor del cupón:</strong> {coupon.value}</p>
         </div>
         <div class="footer">
-            <p>Saludos,<br>Equipo Tosto QR</p>
+            <p>Saludos,<br>Equipo Tosto Coffee</p>
         </div>
     </div>
 </body>

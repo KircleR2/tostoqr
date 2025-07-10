@@ -90,8 +90,8 @@ class Coupon(models.Model):
     
     def send_email_to_customer(self):
         """Envía un correo al cliente con el código del cupón"""
-        subject = 'Tu código de cupón Tosto QR'
-        message = f'Hola {self.customer.first_name},\n\nGracias por registrarte. Tu código de cupón es: {self.code}\n\nPuedes canjearlo en cualquiera de nuestras sucursales.\n\nSaludos,\nEquipo Tosto QR'
+        subject = 'Tu código de cupón Tosto Coffee'
+        message = f'Hola {self.customer.first_name},\n\nGracias por registrarte. Tu código de cupón es: {self.code}\n\nPuedes canjearlo en cualquiera de nuestras sucursales.\n\nSaludos,\nEquipo Tosto Coffee'
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [self.customer.email]
         
