@@ -15,6 +15,14 @@ services:
         value: "False"
       - key: ALLOWED_HOSTS
         value: ".onrender.com,localhost,127.0.0.1"
+      - key: DEFAULT_FROM_EMAIL
+        value: "noreply@tostocoffee.com"
+      - key: PLUNK_API_KEY
+        value: "sk_550494c612156211f9dfd5e4e4d4161f37f795ccddc5af19"
+      - key: PLUNK_SENDER_EMAIL
+        value: "noreply@tostocoffee.com"
+      - key: PLUNK_SENDER_NAME
+        value: "Tosto Coffee"
 
 databases:
   - name: tostoqr-db

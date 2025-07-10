@@ -163,7 +163,7 @@ else:
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@tostoqr.com')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@tostocoffee.com')
 
 # Plunk configuration
 PLUNK_API_KEY = os.environ.get('PLUNK_API_KEY', 'sk_550494c612156211f9dfd5e4e4d4161f37f795ccddc5af19')
