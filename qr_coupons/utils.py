@@ -24,25 +24,24 @@ def send_plunk_email(to_email, subject, text_content, html_content=None):
             return False
         
         # Prepare the email data
-        data = {
+        payload = {
             "to": to_email,
             "subject": subject,
             "body": html_content if html_content else text_content,
-            "from": {
-                "email": settings.PLUNK_SENDER_EMAIL,
-                "name": settings.PLUNK_SENDER_NAME
-            }
+            "subscribed": True,
+            "name": settings.PLUNK_SENDER_NAME,
+            "from": settings.PLUNK_SENDER_EMAIL
         }
         
         # Send the email using Plunk API
         headers = {
-            "Authorization": f"Bearer {settings.PLUNK_API_KEY}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {settings.PLUNK_API_KEY}"
         }
         
         response = requests.post(
             "https://api.useplunk.com/v1/send",
-            json=data,
+            json=payload,
             headers=headers
         )
         
