@@ -73,7 +73,7 @@ def send_coupon_email(request, customer, coupon):
     subject = 'Tu código de cupón Tosto Coffee'
     
     # Build the absolute URL for the logo
-    logo_url = request.build_absolute_uri(static('images/logo.svg'))
+    logo_url = 'https://tostoqr.onrender.com' + static('images/logo.svg')
 
     # Plain text email
     text_content = f"""
