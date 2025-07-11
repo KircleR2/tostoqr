@@ -269,6 +269,7 @@
                                     </div>
                                     <div class="mt-3">
                                         <a href="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" class="btn btn-sm btn-secondary" download="tosto_qr_{{ selected_qr.name|slugify }}.png">Descargar QR</a>
+                                        <a href="{% url 'generate_qr_specific' selected_qr.id %}?direct=1&hires=1" class="btn btn-sm btn-secondary" download="tosto_qr_{{ selected_qr.name|slugify }}_alta_resolucion.png">Alta resolución</a>
                                         <button id="regenerate-qr" class="btn btn-sm btn-warning" data-qr-id="{{ selected_qr.id }}">Regenerar</button>
                                     </div>
                                 </div>
@@ -280,7 +281,7 @@
                                 <h6>Instrucciones de uso:</h6>
                                 <p>Este código QR dirige a los usuarios al formulario de registro. Cada usuario solo podrá registrarse una vez por código QR.</p>
                                 <ol>
-                                    <li>Descargue la imagen del código QR</li>
+                                    <li>Descargue la imagen del código QR (use la opción "Alta resolución" para impresiones en gran formato o vallas publicitarias)</li>
                                     <li>Imprímala o compártala digitalmente con sus clientes</li>
                                     <li>Los usuarios escanean el código y completan el formulario</li>
                                     <li>Recibirán un cupón con código único para canjear</li>
@@ -337,6 +338,17 @@
                         img.onload = function() {
                             // Imagen cargada correctamente
                             console.log("Imagen QR regenerada correctamente");
+                            
+                            // También regenerar la versión de alta resolución (en segundo plano)
+                            fetch(`/generate-qr/${qrId}/?direct=1&regenerate=1&hires=1&t=${new Date().getTime()}`, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Cache-Control': 'no-cache, no-store, must-revalidate'
+                                }
+                            }).catch(error => {
+                                console.error('Error regenerando versión de alta resolución:', error);
+                            });
                         };
                         
                         // Limpiar el contenedor y agregar la nueva imagen

@@ -85,6 +85,7 @@
                         <div class="mt-4">
                             <a href="{% url 'admin:index' %}" class="btn btn-primary">Volver al panel de administración</a>
                             <a href="{% url 'generate_qr_specific' selected_qr.id %}?direct=1" class="btn btn-secondary" download="tosto_qr_{{ selected_qr.name|slugify }}.png">Descargar código QR</a>
+                            <a href="{% url 'generate_qr_specific' selected_qr.id %}?direct=1&hires=1" class="btn btn-secondary" download="tosto_qr_{{ selected_qr.name|slugify }}_alta_resolucion.png">Descargar alta resolución</a>
                             <button id="regenerate-qr" class="btn btn-warning" data-qr-id="{{ selected_qr.id }}">Regenerar código QR</button>
                         </div>
                     {% else %}
@@ -123,6 +124,17 @@
                         img.alt = "Código QR";
                         img.className = "img-fluid";
                         img.style.maxWidth = "300px";
+                        
+                        // También regenerar la versión de alta resolución (en segundo plano)
+                        fetch(`/generate-qr/${qrId}/?direct=1&regenerate=1&hires=1&t=${new Date().getTime()}`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Cache-Control': 'no-cache, no-store, must-revalidate'
+                            }
+                        }).catch(error => {
+                            console.error('Error regenerando versión de alta resolución:', error);
+                        });
                         
                         // Limpiar el contenedor y agregar la nueva imagen
                         container.innerHTML = '';

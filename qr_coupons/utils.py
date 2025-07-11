@@ -1,6 +1,7 @@
 import requests
 from django.conf import settings
 import logging
+from django.templatetags.static import static
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +58,12 @@ def send_plunk_email(to_email, subject, text_content, html_content=None):
         logger.exception(f"Error sending email: {str(e)}")
         return False
 
-def send_coupon_email(customer, coupon):
+def send_coupon_email(request, customer, coupon):
     """
     Send an email with the coupon code to the customer.
     
     Args:
+        request: The current request object
         customer: Customer model instance
         coupon: Coupon model instance
     
@@ -70,6 +72,9 @@ def send_coupon_email(customer, coupon):
     """
     subject = 'Tu código de cupón Tosto Coffee'
     
+    # Build the absolute URL for the logo
+    logo_url = request.build_absolute_uri(static('images/logo.svg'))
+
     # Plain text email
     text_content = f"""
 Hola {customer.first_name},
@@ -92,16 +97,18 @@ Equipo Tosto Coffee
     <style>
         body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
         .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-        .header {{ background-color: #007bff; color: white; padding: 10px; text-align: center; }}
-        .content {{ padding: 20px; background-color: #f9f9f9; }}
-        .coupon-code {{ background-color: #f8f9fa; border: 2px dashed #6c757d; border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 200px; text-align: center; }}
+        .header {{ text-align: center; margin-bottom: 20px; }}
+        .header img {{ max-width: 150px; }}
+        .content {{ padding: 20px; background-color: #f9f9f9; border-radius: 8px; }}
+        .coupon-code {{ background-color: #fff; border: 2px dashed #6c757d; border-radius: 8px; padding: 15px; margin: 20px auto; max-width: 250px; text-align: center; }}
+        .coupon-code h2 {{ margin: 0; font-size: 2.5em; }}
         .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #777; }}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Tosto Coffee</h1>
+            <img src="{logo_url}" alt="Tosto Coffee Logo">
         </div>
         <div class="content">
             <p>Hola <strong>{customer.first_name}</strong>,</p>

@@ -51,6 +51,9 @@ def admin_qr_view(request):
                 qr_code.image_path = f'/static/qr_coupons/images/qr_{qr_code.id}_{qr_code.uuid}.png'
                 qr_code.save()
                 
+                # Also generate high resolution version
+                generate_qr_image(request, qr_code.uuid, is_hires=True)
+                
                 messages.success(request, f"Código QR '{name}' creado exitosamente.")
                 selected_qr = qr_code
         
@@ -174,7 +177,7 @@ def verify_coupon_view(request):
     })
     return render(request, 'qr_coupons/admin_verify_coupon.html', context)
 
-def generate_qr_image(request, uuid_value):
+def generate_qr_image(request, uuid_value, is_hires=False):
     """Generar y guardar una imagen QR"""
     # Crear la URL completa para el formulario de registro
     base_url = request.build_absolute_uri('/').rstrip('/')
@@ -184,7 +187,7 @@ def generate_qr_image(request, uuid_value):
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
+        box_size=30 if is_hires else 10,
         border=4,
     )
     qr.add_data(qr_url)
@@ -194,7 +197,8 @@ def generate_qr_image(request, uuid_value):
     
     # Guardar la imagen
     qr_code = QRCode.objects.get(uuid=uuid_value)
-    img_path = os.path.join(settings.BASE_DIR, 'qr_coupons', 'static', 'qr_coupons', 'images', f'qr_{qr_code.id}_{uuid_value}.png')
+    filename = f"qr_{qr_code.id}_{uuid_value}{'_hires' if is_hires else ''}.png"
+    img_path = os.path.join(settings.BASE_DIR, 'qr_coupons', 'static', 'qr_coupons', 'images', filename)
     os.makedirs(os.path.dirname(img_path), exist_ok=True)
     img.save(img_path)
     

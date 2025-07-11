@@ -65,7 +65,7 @@ def register_form_view(request, qr_uuid=None):
                 )
                 
                 # Enviar el correo con el código del cupón
-                email_sent = send_coupon_email(customer, coupon)
+                email_sent = send_coupon_email(request, customer, coupon)
                 
                 if not email_sent:
                     logger.warning(f"Failed to send email to {customer.email} for coupon {coupon.code}")
@@ -108,6 +108,9 @@ def generate_qr_view(request, qr_id):
     """Genera una imagen QR para un código QR específico"""
     qr_code_obj = get_object_or_404(QRCode, id=qr_id)
     
+    # Check if high resolution is requested
+    is_hires = request.GET.get('hires') == '1'
+    
     # Si se solicita regenerar o si no existe la imagen, siempre generamos una nueva
     if request.GET.get('regenerate') == '1' or not qr_code_obj.image_path or not os.path.exists(os.path.join(settings.BASE_DIR, qr_code_obj.image_path.lstrip('/'))):
         # Generaremos una nueva imagen
@@ -126,7 +129,7 @@ def generate_qr_view(request, qr_id):
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
+        box_size=30 if is_hires else 10,  # Increase box_size for high-res
         border=4,
     )
     qr.add_data(register_url)
@@ -140,20 +143,22 @@ def generate_qr_view(request, qr_id):
     os.makedirs(static_dir, exist_ok=True)
     
     # Crear un nombre de archivo único
-    filename = f"qr_{qr_id}_{qr_code_obj.uuid}.png"
+    filename = f"qr_{qr_id}_{qr_code_obj.uuid}{'_hires' if is_hires else ''}.png"
     file_path = os.path.join(static_dir, filename)
     
     # Guardar la imagen
     img.save(file_path)
     
-    # Actualizar la ruta de la imagen en el modelo
-    relative_path = f"/static/qr_coupons/images/{filename}"
-    qr_code_obj.image_path = relative_path
-    qr_code_obj.save()
+    # Actualizar la ruta de la imagen en el modelo (only for regular size)
+    if not is_hires:
+        relative_path = f"/static/qr_coupons/images/{filename}"
+        qr_code_obj.image_path = relative_path
+        qr_code_obj.save()
     
     # Si la solicitud incluye direct=1, devolver la imagen directamente
     if request.GET.get('direct') == '1':
         with open(file_path, 'rb') as f:
             return HttpResponse(f.read(), content_type='image/png')
     
+    relative_path = f"/static/qr_coupons/images/{filename}"
     return redirect(relative_path)
