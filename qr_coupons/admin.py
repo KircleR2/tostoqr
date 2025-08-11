@@ -58,9 +58,10 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
-    list_display = ('code', 'customer', 'value', 'status', 'created_at', 'redeemed_at', 'redeemed_at_branch')
+    list_display = ('code', 'customer', 'value', 'coupon_name', 'status', 'created_at', 'redeemed_at', 'redeemed_at_branch')
     list_filter = ('status', 'created_at', 'redeemed_at')
-    search_fields = ('code', 'customer__first_name', 'customer__last_name', 'customer__email')
+    search_fields = ('code', 'customer__first_name', 'customer__last_name', 'customer__email', 'customer__qr_code__name')
+    list_select_related = ('customer', 'customer__qr_code', 'redeemed_at_branch')
     readonly_fields = ('code', 'created_at')
     
     actions = ['redeem_coupons']
@@ -96,3 +97,13 @@ class CouponAdmin(admin.ModelAdmin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
+
+    def coupon_name(self, obj):
+        """Nombre del cupón (nombre del QR asociado)"""
+        # El nombre proviene del QR con el que se registró el cliente
+        try:
+            return obj.customer.qr_code.name
+        except Exception:
+            return '-'
+    coupon_name.short_description = 'Nombre del Cupón'
+    coupon_name.admin_order_field = 'customer__qr_code__name'
