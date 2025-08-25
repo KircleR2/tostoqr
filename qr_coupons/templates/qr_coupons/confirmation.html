@@ -23,12 +23,12 @@
                     <p><strong>Valor del cupón:</strong> {{ coupon.value }}</p>
                     {% if customer.qr_code.description %}
                     <div class="mt-4 text-left">
-                        <div class="p-3 border rounded bg-light">
+                        <div class="p-3 rounded" style="border: 1px solid #dc3545; background: #fff5f5;">
                             <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-info-circle text-secondary mr-2"></i>
-                                <span class="font-weight-bold">Descripción de la promoción</span>
+                                <i class="fas fa-info-circle text-danger mr-2"></i>
+                                <span class="font-weight-bold text-danger">Descripción de la promoción</span>
                             </div>
-                            <p class="mb-0 text-muted">{{ customer.qr_code.description }}</p>
+                            <p class="mb-0" style="color: #b02a37; font-weight: 600;">{{ customer.qr_code.description }}</p>
                         </div>
                     </div>
                     {% endif %}

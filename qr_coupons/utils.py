@@ -80,9 +80,9 @@ def send_coupon_email(request, customer, coupon):
     description_text_line = f"\nDescripción: {qr_description}\n" if qr_description else ""
     description_html_block = (
         f"""
-            <div style=\"margin-top:12px;padding:12px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;\">
-                <div style=\"font-weight:600;margin-bottom:6px;color:#555;\">Descripción de la promoción</div>
-                <div style=\"color:#6c757d;\">{qr_description}</div>
+            <div style=\"margin-top:12px;padding:12px;border:1px solid #dc3545;border-radius:8px;background:#fff5f5;\">
+                <div style=\"font-weight:700;margin-bottom:6px;color:#dc3545;\">Descripción de la promoción</div>
+                <div style=\"color:#b02a37;font-weight:600;\">{qr_description}</div>
             </div>
         """
         if qr_description else ""
