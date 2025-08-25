@@ -75,6 +75,11 @@ def send_coupon_email(request, customer, coupon):
     # Build the absolute URL for the logo - using PNG instead of SVG
     logo_url = 'https://tostoqr.onrender.com/static/qr_coupons/images/logo.png'
 
+    # Optional description
+    qr_description = getattr(getattr(customer, 'qr_code', None), 'description', None)
+    description_text_line = f"\nDescripción: {qr_description}\n" if qr_description else ""
+    description_html_block = f"<p><strong>Descripción:</strong> {qr_description}</p>" if qr_description else ""
+
     # Plain text email
     text_content = f"""
 Hola {customer.first_name},
@@ -84,7 +89,7 @@ Gracias por registrarte en Tosto Coffee. Tu código de cupón es: {coupon.code}
 Puedes canjearlo en cualquiera de nuestras sucursales presentando este código.
 
 Valor del cupón: {coupon.value}
-
+{description_text_line}
 Saludos,
 Equipo Tosto Coffee
     """
@@ -120,6 +125,7 @@ Equipo Tosto Coffee
             
             <p>Puedes canjearlo en cualquiera de nuestras sucursales presentando este código.</p>
             <p><strong>Valor del cupón:</strong> {coupon.value}</p>
+            {description_html_block}
         </div>
         <div class="footer">
             <p>Saludos,<br>Equipo Tosto Coffee</p>
