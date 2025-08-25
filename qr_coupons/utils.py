@@ -78,7 +78,15 @@ def send_coupon_email(request, customer, coupon):
     # Optional description
     qr_description = getattr(getattr(customer, 'qr_code', None), 'description', None)
     description_text_line = f"\nDescripción: {qr_description}\n" if qr_description else ""
-    description_html_block = f"<p><strong>Descripción:</strong> {qr_description}</p>" if qr_description else ""
+    description_html_block = (
+        f"""
+            <div style=\"margin-top:12px;padding:12px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;\">
+                <div style=\"font-weight:600;margin-bottom:6px;color:#555;\">Descripción de la promoción</div>
+                <div style=\"color:#6c757d;\">{qr_description}</div>
+            </div>
+        """
+        if qr_description else ""
+    )
 
     # Plain text email
     text_content = f"""
