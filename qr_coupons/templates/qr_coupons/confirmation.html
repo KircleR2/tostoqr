@@ -21,6 +21,10 @@
                         <h2 class="display-4 font-weight-bold">{{ coupon.code }}</h2>
                     </div>
                     <p><strong>Valor del cupón:</strong> {{ coupon.value }}</p>
+                    {% if customer.qr_code.description %}
+                    <hr>
+                    <p><strong>Descripción:</strong> {{ customer.qr_code.description }}</p>
+                    {% endif %}
                     
                     <div class="alert alert-info mt-3">
                         <i class="fas fa-envelope mr-2"></i> Hemos enviado este código a tu correo electrónico <strong>{{ customer.email }}</strong>
